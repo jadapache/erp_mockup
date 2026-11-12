@@ -25,7 +25,8 @@
   border-radius: 8px;
   border: 1px solid #d0d7de;
   box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.18), 0 8px 10px -6px rgba(15, 23, 42, 0.1);
-  overflow: hidden;
+  overflow: visible;
+  isolation: isolate;
   min-width: 320px;
   min-height: 220px;
   max-width: 100%;
@@ -52,50 +53,77 @@
   transform: none !important;
 }
 
-.mdi-drag-spacer {
-  height: 38px;
-  min-height: 38px;
-  width: 100%;
-  position: relative;
+.mdi-titlebar {
+  height: 24px;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px 0 8px;
   background: transparent;
   cursor: grab;
   user-select: none;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 12px;
   flex-shrink: 0;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
 }
 
-.floating-window-controls {
+.titlebar-info {
   display: flex;
   align-items: center;
-  gap: 4px;
-  z-index: 25;
-  background: transparent;
+  min-width: 0;
+  flex: 1;
+}
+
+.titlebar-text {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #475569;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1;
+}
+
+.mdi-window.active .titlebar-text {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.window-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
 }
 
 .ctrl-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 20px;
+  height: 18px;
   border: 1px solid #dee1e4;
-  border-radius: 6px;
+  border-radius: 4px;
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(4px);
   color: #64748b;
   cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   transition: all 0.15s ease;
+  padding: 0;
 }
 
 .ctrl-btn:hover {
   background: #ffffff;
   border-color: #cbd5e1;
   color: #0f172a;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.ctrl-btn:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
 }
 
 .close-btn:hover {
@@ -110,6 +138,13 @@
   background: #f8fafc;
   min-height: 0;
   position: relative;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.mdi-window.maximized .mdi-content,
+.mdi-window.maximized .mdi-titlebar {
+  border-radius: 0;
 }
 
 .resize-handle {

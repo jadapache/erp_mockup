@@ -191,8 +191,9 @@ import { Component, signal } from '@angular/core';
       display: flex;
       flex-direction: column;
       gap: 16px;
-      height: 100%;
-      overflow-y: auto;
+      min-height: 100%;
+      height: auto;
+      overflow: visible;
     }
     .page-header {
       display: flex;
