@@ -41,7 +41,12 @@ export class MdiWindowService {
     };
 
     this.windowsState.update(windows => [
-      ...windows.map(w => ({ ...w, active: false })),
+      ...windows.map(w => ({
+        ...w,
+        active: false,
+        maximized: false,
+        ...(w.maximized && w.restoreGeometry ? w.restoreGeometry : {})
+      })),
       windowItem
     ]);
 
@@ -53,6 +58,8 @@ export class MdiWindowService {
       windows.map(w => ({
         ...w,
         active: w.id === id && !w.minimized,
+        maximized: w.id === id ? w.maximized : false,
+        ...(w.id !== id && w.maximized && w.restoreGeometry ? w.restoreGeometry : {}),
         zIndex: w.id === id ? ++this.nextZIndex : w.zIndex
       }))
     );
