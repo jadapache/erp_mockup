@@ -1,0 +1,73 @@
+<div
+  class="mdi-window"
+  cdkDrag
+  [cdkDragDisabled]="window().maximized"
+  [cdkDragFreeDragPosition]="window().maximized ? { x: 0, y: 0 } : { x: window().x, y: window().y }"
+  [style.width.px]="window().maximized ? null : window().width"
+  [style.height.px]="window().maximized ? null : window().height"
+  [style.z-index]="window().zIndex"
+  [class.active]="window().active"
+  [class.maximized]="window().maximized"
+  (cdkDragEnded)="onDragEnded($event)"
+  (mousedown)="activate.emit(window().id)"
+>
+  <div class="mdi-titlebar" cdkDragHandle>
+    <div class="title-left">
+      <span class="title-text">{{ window().title }}</span>
+    </div>
+
+    <div class="window-controls" (mousedown)="$event.stopPropagation()">
+      <button
+        type="button"
+        class="ctrl-btn"
+        title="Minimizar"
+        (click)="minimize.emit(window().id)"
+      >
+        <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor">
+          <rect y="7" width="16" height="2" rx="1" />
+        </svg>
+      </button>
+
+      <button
+        type="button"
+        class="ctrl-btn"
+        title="Maximizar / Restaurar"
+        (click)="maximize.emit(window().id)"
+      >
+        @if (window().maximized) {
+          <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="1" y="4" width="9" height="9" rx="1" />
+            <path d="M4 1h9a1 1 0 0 1 1 1v9" />
+          </svg>
+        } @else {
+          <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="1.5" y="1.5" width="13" height="13" rx="1" />
+          </svg>
+        }
+      </button>
+
+      <button
+        type="button"
+        class="ctrl-btn close-btn"
+        title="Cerrar"
+        (click)="close.emit(window().id)"
+      >
+        <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M2 2l12 12M14 2L2 14" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="mdi-content">
+    <ng-container *ngComponentOutlet="window().component"></ng-container>
+  </div>
+
+  @if (!window().maximized) {
+    <div
+      class="resize-handle"
+      title="Redimensionar"
+      (mousedown)="onResizeStart($event)"
+    ></div>
+  }
+</div>
