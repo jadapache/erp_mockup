@@ -9,6 +9,7 @@ import {
   canAccommodateDock,
   calculateDockGeometries,
   getPreviewRect,
+  clampWindowPosition,
   MIN_WINDOW_WIDTH,
   MIN_WINDOW_HEIGHT
 } from './mdi-dock-utils';
@@ -256,13 +257,27 @@ export class MdiWindowService {
     );
 
     if (!pos) {
-      this.move(id, Math.max(0, currentRect.x), Math.max(0, currentRect.y));
+      const clamped = clampWindowPosition(
+        currentRect.x,
+        currentRect.y,
+        currentRect.width,
+        currentRect.height,
+        this.lastWorkspaceRect
+      );
+      this.move(id, clamped.x, clamped.y);
       return;
     }
 
     const candidate = this.evaluateDockCandidate(id, pos);
     if (!candidate) {
-      this.move(id, Math.max(0, currentRect.x), Math.max(0, currentRect.y));
+      const clamped = clampWindowPosition(
+        currentRect.x,
+        currentRect.y,
+        currentRect.width,
+        currentRect.height,
+        this.lastWorkspaceRect
+      );
+      this.move(id, clamped.x, clamped.y);
       return;
     }
 

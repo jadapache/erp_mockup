@@ -24,6 +24,8 @@ export interface DragPositionPayload {
 })
 export class MdiWindowComponent {
   window = input.required<MdiWindow>();
+  workspaceWidth = input<number>(1200);
+  workspaceHeight = input<number>(800);
 
   activate = output<string>();
   close = output<string>();

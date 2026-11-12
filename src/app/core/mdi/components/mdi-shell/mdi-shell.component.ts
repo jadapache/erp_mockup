@@ -34,6 +34,8 @@ export class MdiShellComponent implements AfterViewInit, OnDestroy {
   readonly selectedModuleCode = signal<string>('adm');
   readonly sidebarCollapsed = signal<boolean>(false);
   readonly searchQuery = signal<string>('');
+  readonly workspaceWidth = signal<number>(1200);
+  readonly workspaceHeight = signal<number>(800);
 
   private resizeObserver?: ResizeObserver;
   private isResizingSplitter = false;
@@ -175,6 +177,8 @@ export class MdiShellComponent implements AfterViewInit, OnDestroy {
   private updateWorkspaceDimensions(): void {
     const el = this.workspaceRef()?.nativeElement;
     if (!el) return;
+    this.workspaceWidth.set(el.clientWidth);
+    this.workspaceHeight.set(el.clientHeight);
     this.mdi.setWorkspaceRect({
       width: el.clientWidth,
       height: el.clientHeight

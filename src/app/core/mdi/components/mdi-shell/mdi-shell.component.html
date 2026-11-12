@@ -176,6 +176,8 @@
           @if (!window.minimized) {
             <app-mdi-window
               [window]="window"
+              [workspaceWidth]="workspaceWidth()"
+              [workspaceHeight]="workspaceHeight()"
               (activate)="mdi.activate($event)"
               (close)="mdi.close($event)"
               (minimize)="mdi.minimize($event)"

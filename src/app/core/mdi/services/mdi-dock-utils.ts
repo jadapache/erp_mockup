@@ -1,9 +1,10 @@
 import { DockOrientation, DockPosition } from '../models/mdi-window.model';
 
-export const DOCK_DETECTION_ZONE = 20;
+export const DOCK_DETECTION_ZONE = 24;
 export const MIN_WINDOW_WIDTH = 320;
 export const MIN_WINDOW_HEIGHT = 220;
 export const SPLITTER_SIZE = 6;
+export const MIN_VISIBLE_TITLEBAR = 80;
 
 export interface WorkspaceRect {
   width: number;
@@ -17,18 +18,39 @@ export interface WindowRect {
   height: number;
 }
 
+export function clampWindowPosition(
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  ws: WorkspaceRect,
+  minVisible = MIN_VISIBLE_TITLEBAR
+): { x: number; y: number } {
+  const clampedY = Math.max(0, Math.min(ws.height - 30, y));
+  const minX = -(width - minVisible);
+  const maxX = ws.width - minVisible;
+  const clampedX = Math.max(minX, Math.min(maxX, x));
+
+  return { x: clampedX, y: clampedY };
+}
+
 export function detectDockCandidate(
   x: number,
-  _y: number,
+  y: number,
   width: number,
-  _height: number,
+  height: number,
   ws: WorkspaceRect,
   detectionZone = DOCK_DETECTION_ZONE
 ): DockPosition | null {
+  const windowBottom = y + height;
+  if (y < -30 || windowBottom > ws.height + 40) {
+    return null;
+  }
+
   const windowRight = x + width;
 
-  const hitLeft = x <= detectionZone;
-  const hitRight = ws.width - windowRight <= detectionZone;
+  const hitLeft = x >= -detectionZone && x <= detectionZone;
+  const hitRight = Math.abs(ws.width - windowRight) <= detectionZone;
 
   if (hitLeft) return 'left';
   if (hitRight) return 'right';
