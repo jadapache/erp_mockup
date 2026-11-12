@@ -5,11 +5,12 @@ import { getOrCreateForm } from '../../mdi-registry';
 import { MENU_MODULES } from '../../menu-data';
 import { MenuModule, MenuItem } from '../../models/menu.model';
 import { InicioViewComponent } from '../inicio-view.component';
+import { MenuNodeComponent } from '../menu-node/menu-node.component';
 
 @Component({
   selector: 'app-mdi-shell',
   standalone: true,
-  imports: [MdiWindowComponent, InicioViewComponent],
+  imports: [MdiWindowComponent, InicioViewComponent, MenuNodeComponent],
   templateUrl: './mdi-shell.component.html',
   styleUrl: './mdi-shell.component.css'
 })
@@ -19,7 +20,7 @@ export class MdiShellComponent {
   readonly workspaceRef = viewChild<ElementRef<HTMLElement>>('workspace');
 
   readonly allModules: MenuModule[] = MENU_MODULES;
-  readonly selectedModuleCode = signal<string>('con');
+  readonly selectedModuleCode = signal<string>('adm');
   readonly sidebarCollapsed = signal<boolean>(false);
   readonly searchQuery = signal<string>('');
 
@@ -32,7 +33,7 @@ export class MdiShellComponent {
     const q = this.searchQuery().trim().toLowerCase();
     const items = this.currentModule()?.items ?? [];
     if (!q) return items;
-    return items.filter((it: MenuItem) => it.name.toLowerCase().includes(q));
+    return this.filterTree(items, q);
   });
 
   constructor() {
@@ -78,5 +79,20 @@ export class MdiShellComponent {
     const w = el ? el.clientWidth : window.innerWidth - 300;
     const h = el ? el.clientHeight : window.innerHeight - 90;
     this.mdi.tileVertical(w, h);
+  }
+
+  private filterTree(nodes: MenuItem[], query: string): MenuItem[] {
+    const result: MenuItem[] = [];
+    for (const node of nodes) {
+      const matchSelf = node.name.toLowerCase().includes(query);
+      const filteredChildren = node.children ? this.filterTree(node.children, query) : [];
+      if (matchSelf || filteredChildren.length > 0) {
+        result.push({
+          ...node,
+          children: filteredChildren.length > 0 ? filteredChildren : node.children
+        });
+      }
+    }
+    return result;
   }
 }

@@ -109,6 +109,7 @@
     </aside>
 
     <!-- Secondary Nav Sidebar with Options -->
+    <!-- Secondary Nav Sidebar with Hierarchical Options -->
     @if (!sidebarCollapsed()) {
       <aside class="secondary-sidebar">
         <div class="options-scroll-container">
@@ -124,6 +125,11 @@
               </svg>
               <span class="item-text">{{ item.name }}</span>
             </button>
+            <app-menu-node
+              [item]="item"
+              [level]="0"
+              (itemSelect)="openMenuItem($event)"
+            />
           } @empty {
             <div class="no-items">No se encontraron opciones</div>
           }

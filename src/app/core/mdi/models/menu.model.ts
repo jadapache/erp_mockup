@@ -3,6 +3,7 @@ export interface MenuItem {
   name: string;
   orden?: string;
   url?: string;
+  children?: MenuItem[];
 }
 
 export interface MenuModule {
