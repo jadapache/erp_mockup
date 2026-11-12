@@ -52,56 +52,15 @@
   transform: none !important;
 }
 
-.mdi-titlebar {
-  height: 38px;
-  min-height: 38px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 8px 0 12px;
-  background: #f1f5f9;
-  border-bottom: 1px solid #e2e8f0;
-  color: #334155;
-  cursor: grab;
-  user-select: none;
-}
-
-.mdi-window.active .mdi-titlebar {
-  background: linear-gradient(180deg, #1e40af 0%, #1d4ed8 100%);
-  color: #ffffff;
-  border-bottom-color: #1e3a8a;
-}
-
-.title-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  overflow: hidden;
-}
-
-.app-icon {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #94a3b8;
-}
-
-.mdi-window.active .app-icon {
-  background: #60a5fa;
-}
-
-.title-text {
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.window-controls {
+.floating-window-controls {
+  position: absolute;
+  top: 10px;
+  right: 12px;
   display: flex;
   align-items: center;
   gap: 4px;
+  z-index: 25;
+  background: transparent;
 }
 
 .ctrl-btn {
@@ -109,27 +68,27 @@
   align-items: center;
   justify-content: center;
   width: 26px;
-  height: 24px;
-  border: none;
-  border-radius: 4px;
-  background: transparent;
-  color: inherit;
-  opacity: 0.85;
+  height: 26px;
+  border: 1px solid #dee1e4;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
+  color: #64748b;
   cursor: pointer;
-  transition: all 0.12s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.15s ease;
 }
 
 .ctrl-btn:hover {
-  opacity: 1;
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.mdi-window:not(.active) .ctrl-btn:hover {
-  background: #e2e8f0;
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .close-btn:hover {
   background: #ef4444 !important;
+  border-color: #dc2626 !important;
   color: #ffffff !important;
 }
 

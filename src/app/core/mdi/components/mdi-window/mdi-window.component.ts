@@ -1,12 +1,12 @@
 import { Component, input, output } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
-import { CdkDrag, CdkDragHandle, CdkDragEnd } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragEnd } from '@angular/cdk/drag-drop';
 import { MdiWindow } from '../../models/mdi-window.model';
 
 @Component({
   selector: 'app-mdi-window',
   standalone: true,
-  imports: [NgComponentOutlet, CdkDrag, CdkDragHandle],
+  imports: [NgComponentOutlet, CdkDrag],
   templateUrl: './mdi-window.component.html',
   styleUrl: './mdi-window.component.css',
   host: {
