@@ -36,9 +36,7 @@ export class MdiShellComponent {
     return this.filterTree(items, q);
   });
 
-  constructor() {
-    this.openFormById('asociarProductos', 'Asociar Productos a Contratos');
-  }
+  constructor() {}
 
   toggleSidebar(): void {
     this.sidebarCollapsed.update(v => !v);

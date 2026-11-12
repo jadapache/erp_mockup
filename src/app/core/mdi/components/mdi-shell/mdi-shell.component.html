@@ -150,19 +150,27 @@
 
       <!-- Windows Taskbar -->
       <footer class="mdi-taskbar">
-        <div class="taskbar-label">Formularios abiertos:</div>
         <div class="taskbar-items">
           @for (window of windows(); track window.id) {
-            <button
-              type="button"
-              class="taskbar-btn"
+            <div
+              class="taskbar-tab"
               [class.active]="window.active && !window.minimized"
               [class.minimized]="window.minimized"
               (click)="window.minimized ? mdi.restore(window.id) : (window.active ? mdi.minimize(window.id) : mdi.activate(window.id))"
               [title]="window.title"
             >
               <span class="btn-text">{{ window.title }}</span>
-            </button>
+              <button
+                type="button"
+                class="tab-close-btn"
+                title="Cerrar formulario"
+                (click)="$event.stopPropagation(); mdi.close(window.id)"
+              >
+                <svg viewBox="0 0 16 16" width="9" height="9" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M2 2l12 12M14 2L2 14" />
+                </svg>
+              </button>
+            </div>
           } @empty {
             <span class="taskbar-empty">No hay ventanas abiertas</span>
           }
