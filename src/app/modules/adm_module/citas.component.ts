@@ -6,7 +6,7 @@ import { Component, signal } from '@angular/core';
   template: `
     <div class="page-container">
       <div class="page-header">
-        <div>
+        <div class="header-left">
           <h2 class="page-title">Gestión de Citas</h2>
           <div class="breadcrumbs">
             <span>Admisiones</span> / <span class="active-crumb">Citas</span>
@@ -22,7 +22,8 @@ import { Component, signal } from '@angular/core';
         </button>
       </div>
 
-      <div class="card-collapsible">
+      <div class="content-body">
+        <div class="card-collapsible">
         <div class="card-header" (click)="toggleFilters()">
           <div class="header-left">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
@@ -185,26 +186,33 @@ import { Component, signal } from '@angular/core';
   `,
   styles: [`
     .page-container {
-      padding: 24px;
-      color: #1e293b;
-      box-sizing: border-box;
       display: flex;
       flex-direction: column;
-      gap: 16px;
       min-height: 100%;
-      height: auto;
-      overflow: visible;
+      box-sizing: border-box;
+      background: #f4f5f7;
     }
     .page-header {
+      background: #ffffff;
+      padding: 16px 24px;
+      border-bottom: 1px solid #e2e8f0;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
     .page-title {
       font-size: 20px;
       font-weight: 700;
       color: #0f172a;
-      margin: 0 0 4px 0;
+      margin: 0;
+      line-height: 1.2;
     }
     .breadcrumbs {
       font-size: 13px;
@@ -226,6 +234,13 @@ import { Component, signal } from '@angular/core';
       align-items: center;
       gap: 6px;
       cursor: pointer;
+    }
+    .content-body {
+      flex: 1;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
     .card-collapsible {
       background: #ffffff;

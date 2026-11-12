@@ -6,52 +6,84 @@ import { Component } from '@angular/core';
   template: `
     <div class="page-container">
       <div class="page-header">
-        <h2 class="page-title">Asociar Productos a Contratos</h2>
-        <p class="page-desc">Declare qué productos cubre un contrato, con trazabilidad de quién y cuándo.</p>
+        <div class="header-left">
+          <h2 class="page-title">Asociar Productos a Contratos</h2>
+          <div class="breadcrumbs">
+            <span>Contratos</span> / <span>Configuración</span> / <span class="active-crumb">Asociar Productos</span>
+          </div>
+        </div>
       </div>
 
-      <div class="content-box">
-        <label class="form-label">Contrato</label>
-        <div class="form-row">
-          <select class="form-select">
-            <option>Seleccione un contrato...</option>
-            <option>C-9000 - TERCERO CONTRATO PRUEBA (HU-CON-009)</option>
-            <option>C-9001 - TERCERO CONTRATO PRUEBA (HU-CON-009)</option>
-            <option>C-9002 - TERCERO CONTRATO PRUEBA (HU-CON-009)</option>
-          </select>
-          <button class="btn btn-primary">Cargar productos</button>
-        </div>
-
-        <div class="field-readonly">
-          <span>Productos configurados</span>
-        </div>
-
-        <div class="actions-row">
-          <div class="action-links">
-            <button class="btn-link">Habilitar todos</button>
-            <button class="btn-link">Inhabilitar todos</button>
+      <div class="content-body">
+        <div class="content-box">
+          <label class="form-label">Contrato</label>
+          <div class="form-row">
+            <select class="form-select">
+              <option>Seleccione un contrato...</option>
+              <option>C-9000 - TERCERO CONTRATO PRUEBA (HU-CON-009)</option>
+              <option>C-9001 - TERCERO CONTRATO PRUEBA (HU-CON-009)</option>
+              <option>C-9002 - TERCERO CONTRATO PRUEBA (HU-CON-009)</option>
+            </select>
+            <button class="btn btn-primary">Cargar productos</button>
           </div>
-          <button class="btn btn-primary">Agregar productos</button>
-          <button class="btn btn-primary btn-save">Guardar</button>
+
+          <div class="field-readonly">
+            <span>Productos configurados</span>
+          </div>
+
+          <div class="actions-row">
+            <div class="action-links">
+              <button class="btn-link">Habilitar todos</button>
+              <button class="btn-link">Inhabilitar todos</button>
+            </div>
+            <button class="btn btn-primary">Agregar productos</button>
+            <button class="btn btn-primary btn-save">Guardar</button>
+          </div>
         </div>
       </div>
     </div>
   `,
   styles: [`
     .page-container {
-      padding: 24px;
-      color: #1e293b;
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+      box-sizing: border-box;
+      background: #f4f5f7;
+    }
+    .page-header {
+      background: #ffffff;
+      padding: 16px 24px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
     .page-title {
       font-size: 20px;
       font-weight: 700;
       color: #0f172a;
-      margin: 0 0 4px 0;
+      margin: 0;
+      line-height: 1.2;
     }
-    .page-desc {
+    .breadcrumbs {
       font-size: 13px;
       color: #64748b;
-      margin: 0 0 20px 0;
+    }
+    .active-crumb {
+      color: #0284c7;
+      font-weight: 600;
+    }
+    .content-body {
+      flex: 1;
+      padding: 20px 24px;
     }
     .content-box {
       background: #ffffff;

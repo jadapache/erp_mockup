@@ -6,39 +6,43 @@ import { Component, signal } from '@angular/core';
   template: `
     <div class="page-container">
       <div class="page-header">
-        <h2 class="page-title">Condiciones de Tarifa</h2>
-        <div class="breadcrumbs">
-          <span>Contratos</span> / <span>Configuración</span> / <span class="active-crumb">Condiciones sobre tarifa</span>
-        </div>
-      </div>
-
-      <div class="search-box">
-        <label class="form-label">Contrato</label>
-        <div class="search-row">
-          <div class="input-icon-wrap" (click)="openContractModal()">
-            <input
-              type="text"
-              class="form-input"
-              [value]="selectedContract()"
-              placeholder="Buscar contrato por código o nombre..."
-              readonly
-            />
-            <svg class="search-icon" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+        <div class="header-left">
+          <h2 class="page-title">Condiciones de Tarifa</h2>
+          <div class="breadcrumbs">
+            <span>Contratos</span> / <span>Configuración</span> / <span class="active-crumb">Condiciones sobre tarifa</span>
           </div>
-          <label class="checkbox-label">
-            <input type="checkbox" />
-            <span>Incluir contratos inactivos</span>
-          </label>
         </div>
       </div>
 
-      <div class="empty-state">
-        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#64748b" stroke-width="1.8">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-        </svg>
-        <p class="empty-text">Seleccione un contrato para ver y gestionar sus condiciones.</p>
+      <div class="content-body">
+        <div class="search-box">
+          <label class="form-label">Contrato</label>
+          <div class="search-row">
+            <div class="input-icon-wrap" (click)="openContractModal()">
+              <input
+                type="text"
+                class="form-input"
+                [value]="selectedContract()"
+                placeholder="Buscar contrato por código o nombre..."
+                readonly
+              />
+              <svg class="search-icon" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <label class="checkbox-label">
+              <input type="checkbox" />
+              <span>Incluir contratos inactivos</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#64748b" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+          </svg>
+          <p class="empty-text">Seleccione un contrato para ver y gestionar sus condiciones.</p>
+        </div>
       </div>
 
       @if (showModal()) {
@@ -75,24 +79,46 @@ import { Component, signal } from '@angular/core';
   `,
   styles: [`
     .page-container {
-      padding: 24px;
-      color: #1e293b;
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+      box-sizing: border-box;
+      background: #f4f5f7;
       position: relative;
+    }
+    .page-header {
+      background: #ffffff;
+      padding: 16px 24px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
     .page-title {
       font-size: 20px;
       font-weight: 700;
       color: #0f172a;
-      margin: 0 0 4px 0;
+      margin: 0;
+      line-height: 1.2;
     }
     .breadcrumbs {
-      font-size: 12px;
+      font-size: 13px;
       color: #64748b;
-      margin-bottom: 20px;
     }
     .active-crumb {
-      color: #2563eb;
-      font-weight: 500;
+      color: #0284c7;
+      font-weight: 600;
+    }
+    .content-body {
+      flex: 1;
+      padding: 20px 24px;
     }
     .search-box {
       background: #ffffff;

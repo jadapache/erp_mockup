@@ -7,7 +7,7 @@ import { Component, signal } from '@angular/core';
     <div class="page-container">
       <!-- Encabezado de página -->
       <div class="page-header">
-        <div>
+        <div class="header-left">
           <h2 class="page-title">Atención del Paciente</h2>
           <div class="breadcrumbs">
             <span>Admisiones</span> / <span>Atención del paciente</span> / <span class="active-crumb">Datos Básicos</span>
@@ -25,8 +25,9 @@ import { Component, signal } from '@angular/core';
         </div>
       </div>
 
-      <!-- Barra de Pestañas / Tabs -->
-      <div class="nav-tabs">
+      <div class="content-body">
+        <!-- Barra de Pestañas / Tabs -->
+        <div class="nav-tabs">
         <button
           type="button"
           class="tab-btn"
@@ -382,25 +383,33 @@ import { Component, signal } from '@angular/core';
   `,
   styles: [`
     .page-container {
-      padding: 24px;
-      color: #1e293b;
-      box-sizing: border-box;
       display: flex;
       flex-direction: column;
-      gap: 16px;
-      height: 100%;
-      overflow-y: auto;
+      min-height: 100%;
+      box-sizing: border-box;
+      background: #f4f5f7;
     }
     .page-header {
+      background: #ffffff;
+      padding: 16px 24px;
+      border-bottom: 1px solid #e2e8f0;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
     .page-title {
       font-size: 20px;
       font-weight: 700;
       color: #0f172a;
-      margin: 0 0 4px 0;
+      margin: 0;
+      line-height: 1.2;
     }
     .breadcrumbs {
       font-size: 13px;
@@ -438,6 +447,13 @@ import { Component, signal } from '@angular/core';
       align-items: center;
       gap: 6px;
       cursor: pointer;
+    }
+    .content-body {
+      flex: 1;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
     .nav-tabs {
       display: flex;

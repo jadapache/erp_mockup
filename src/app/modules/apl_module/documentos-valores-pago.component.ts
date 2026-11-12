@@ -27,7 +27,7 @@ interface DocPagoNode {
   template: `
     <div class="page-container">
       <div class="page-header">
-        <div>
+        <div class="header-left">
           <h2 class="page-title">Documentos Valores de Pago</h2>
           <div class="breadcrumbs">
             <span>Administrador de Aplicación</span> / <span class="active-crumb">Documentos de Pago</span>
@@ -36,7 +36,8 @@ interface DocPagoNode {
         <button type="button" class="btn-action-primary">+ Nuevo Documento</button>
       </div>
 
-      <div class="grid-layout">
+      <div class="content-body">
+        <div class="grid-layout">
         <!-- Panel Izquierdo: Arbol Documentos -->
         <div class="panel tree-panel">
           <div class="panel-header">
@@ -218,23 +219,33 @@ interface DocPagoNode {
   `,
   styles: [`
     .page-container {
-      padding: 24px;
-      color: #1e293b;
-      box-sizing: border-box;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      min-height: 100%;
+      box-sizing: border-box;
+      background: #f4f5f7;
     }
     .page-header {
+      background: #ffffff;
+      padding: 16px 24px;
+      border-bottom: 1px solid #e2e8f0;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
     .page-title {
       font-size: 20px;
       font-weight: 700;
       color: #0f172a;
-      margin: 0 0 4px 0;
+      margin: 0;
+      line-height: 1.2;
     }
     .breadcrumbs {
       font-size: 13px;
@@ -254,6 +265,12 @@ interface DocPagoNode {
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
+    }
+    .content-body {
+      flex: 1;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
     }
     .grid-layout {
       display: grid;

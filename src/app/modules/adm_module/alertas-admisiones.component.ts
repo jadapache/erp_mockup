@@ -16,7 +16,7 @@ interface AlertaItem {
   template: `
     <div class="page-container">
       <div class="page-header">
-        <div>
+        <div class="header-left">
           <h2 class="page-title">Alertas</h2>
           <div class="breadcrumbs">
             <span>Admisiones</span> / <span>Procesos</span> / <span class="active-crumb">Alertas</span>
@@ -42,8 +42,9 @@ interface AlertaItem {
         </div>
       </div>
 
-      <!-- KPI Summary Cards -->
-      <div class="kpi-grid">
+      <div class="content-body">
+        <!-- KPI Summary Cards -->
+        <div class="kpi-grid">
         <div class="kpi-card">
           <svg class="kpi-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#0284c7" stroke-width="2">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
@@ -151,30 +152,39 @@ interface AlertaItem {
             }
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   `,
   styles: [`
     .page-container {
-      padding: 24px;
-      color: #1e293b;
-      box-sizing: border-box;
       display: flex;
       flex-direction: column;
-      gap: 16px;
-      height: 100%;
-      overflow-y: auto;
+      min-height: 100%;
+      box-sizing: border-box;
+      background: #f4f5f7;
     }
     .page-header {
+      background: #ffffff;
+      padding: 16px 24px;
+      border-bottom: 1px solid #e2e8f0;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
     .page-title {
       font-size: 20px;
       font-weight: 700;
       color: #0f172a;
-      margin: 0 0 4px 0;
+      margin: 0;
+      line-height: 1.2;
     }
     .breadcrumbs {
       font-size: 13px;
@@ -203,7 +213,7 @@ interface AlertaItem {
       cursor: pointer;
     }
     .btn-save {
-      background: #7ca3cc;
+      background: #0284c7;
       border: none;
       border-radius: 8px;
       padding: 0 18px;
@@ -215,6 +225,13 @@ interface AlertaItem {
       align-items: center;
       gap: 6px;
       cursor: pointer;
+    }
+    .content-body {
+      flex: 1;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
     .kpi-grid {
       display: grid;
