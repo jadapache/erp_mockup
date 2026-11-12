@@ -14,6 +14,9 @@ import { GenericModuleViewComponent } from '../../modules/common/generic-module-
 import { DivisionPoliticaComponent } from '../../modules/apl_module/division-politica.component';
 import { NumeracionComponent } from '../../modules/apl_module/numeracion.component';
 import { DocumentosValoresPagoComponent } from '../../modules/apl_module/documentos-valores-pago.component';
+import { CitasComponent } from '../../modules/adm_module/citas.component';
+import { AlertasAdmisionesComponent } from '../../modules/adm_module/alertas-admisiones.component';
+import { AtencionPacienteComponent } from '../../modules/adm_module/atencion-paciente.component';
 
 export interface FormDefinition {
   id: string;
@@ -142,6 +145,48 @@ export const MDI_FORMS: Record<string, FormDefinition> = {
     component: NumeracionComponent,
     width: 900,
     height: 520
+  },
+  citas: {
+    id: 'citas',
+    title: 'Gestión de Citas',
+    component: CitasComponent,
+    width: 1040,
+    height: 620
+  },
+  mnu_Adm_Proc_Cita: {
+    id: 'mnu_Adm_Proc_Cita',
+    title: 'Gestión de Citas',
+    component: CitasComponent,
+    width: 1040,
+    height: 620
+  },
+  alertas: {
+    id: 'alertas',
+    title: 'Alertas',
+    component: AlertasAdmisionesComponent,
+    width: 960,
+    height: 540
+  },
+  mnu_Adm_Proc_Aler: {
+    id: 'mnu_Adm_Proc_Aler',
+    title: 'Alertas',
+    component: AlertasAdmisionesComponent,
+    width: 960,
+    height: 540
+  },
+  atencionPaciente: {
+    id: 'atencionPaciente',
+    title: 'Atención del Paciente',
+    component: AtencionPacienteComponent,
+    width: 1100,
+    height: 680
+  },
+  mnu_Adm_Proc_Aten: {
+    id: 'mnu_Adm_Proc_Aten',
+    title: 'Atención del Paciente',
+    component: AtencionPacienteComponent,
+    width: 1100,
+    height: 680
   }
 };
 
