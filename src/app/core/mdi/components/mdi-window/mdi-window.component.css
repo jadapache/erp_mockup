@@ -36,8 +36,8 @@
 }
 
 .mdi-window.active {
-  border-color: #2563eb;
-  box-shadow: 0 16px 36px -6px rgba(37, 99, 235, 0.25), 0 10px 16px -8px rgba(15, 23, 42, 0.15);
+  border-color: #d0d7de;
+  box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.22), 0 10px 16px -8px rgba(15, 23, 42, 0.15);
 }
 
 .mdi-window.maximized {
