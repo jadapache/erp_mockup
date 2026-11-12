@@ -108,23 +108,11 @@
       </div>
     </aside>
 
-    <!-- Secondary Nav Sidebar with Options -->
     <!-- Secondary Nav Sidebar with Hierarchical Options -->
     @if (!sidebarCollapsed()) {
       <aside class="secondary-sidebar">
         <div class="options-scroll-container">
           @for (item of filteredItems(); track item.id) {
-            <button
-              type="button"
-              class="submenu-btn"
-              (click)="openMenuItem(item)"
-              [title]="item.name"
-            >
-              <svg class="item-icon" viewBox="0 0 20 20" width="14" height="14" fill="currentColor">
-                <circle cx="10" cy="10" r="3"/>
-              </svg>
-              <span class="item-text">{{ item.name }}</span>
-            </button>
             <app-menu-node
               [item]="item"
               [level]="0"

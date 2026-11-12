@@ -60,7 +60,13 @@ export class MdiShellComponent {
 
   openFormById(id: string, defaultTitle: string): void {
     const formDef = getOrCreateForm(id, defaultTitle, this.currentModule().name);
-    this.mdi.open(formDef.title, formDef.component, formDef.width, formDef.height);
+    const el = this.workspaceRef()?.nativeElement;
+    const win = typeof window !== 'undefined' ? window : null;
+    const maxW = el ? Math.max(360, el.clientWidth - 40) : (win ? win.innerWidth - 340 : 1200);
+    const maxH = el ? Math.max(260, el.clientHeight - 40) : (win ? win.innerHeight - 140 : 800);
+    const targetW = Math.min(formDef.width, maxW);
+    const targetH = Math.min(formDef.height, maxH);
+    this.mdi.open(formDef.title, formDef.component, targetW, targetH);
   }
 
   cascadeWindows(): void {
@@ -69,15 +75,17 @@ export class MdiShellComponent {
 
   tileHorizontal(): void {
     const el = this.workspaceRef()?.nativeElement;
-    const w = el ? el.clientWidth : window.innerWidth - 300;
-    const h = el ? el.clientHeight : window.innerHeight - 90;
+    const win = typeof window !== 'undefined' ? window : null;
+    const w = el ? el.clientWidth : (win ? win.innerWidth - 300 : 1000);
+    const h = el ? el.clientHeight : (win ? win.innerHeight - 90 : 700);
     this.mdi.tileHorizontal(w, h);
   }
 
   tileVertical(): void {
     const el = this.workspaceRef()?.nativeElement;
-    const w = el ? el.clientWidth : window.innerWidth - 300;
-    const h = el ? el.clientHeight : window.innerHeight - 90;
+    const win = typeof window !== 'undefined' ? window : null;
+    const w = el ? el.clientWidth : (win ? win.innerWidth - 300 : 1000);
+    const h = el ? el.clientHeight : (win ? win.innerHeight - 90 : 700);
     this.mdi.tileVertical(w, h);
   }
 
