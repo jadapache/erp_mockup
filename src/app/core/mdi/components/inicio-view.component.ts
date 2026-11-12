@@ -22,42 +22,45 @@ import { Component } from '@angular/core';
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100%;
-      padding: 40px 20px;
+      width: 100%;
+      height: 100%;
+      padding: clamp(16px, 3vh, 32px) 20px;
+      box-sizing: border-box;
     }
     .welcome-card {
       background: #ffffff;
       border: 1px solid #e2e8f0;
       border-radius: 20px;
-      padding: 48px 36px;
+      padding: clamp(24px, 4vh, 40px) clamp(20px, 4vw, 36px);
       max-width: 620px;
       width: 100%;
       text-align: center;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      box-sizing: border-box;
     }
     .avatar-badge {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 64px;
-      height: 64px;
+      width: clamp(48px, 6vw, 64px);
+      height: clamp(48px, 6vw, 64px);
       border-radius: 16px;
       background: #eff6ff;
       color: #1e40af;
-      font-size: 28px;
+      font-size: clamp(22px, 3vw, 28px);
       font-weight: 700;
-      margin-bottom: 24px;
+      margin-bottom: clamp(12px, 2vh, 20px);
     }
     .welcome-title {
-      font-size: 26px;
+      font-size: clamp(20px, 2.5vw, 26px);
       font-weight: 700;
       color: #0f172a;
       margin: 0 0 8px 0;
     }
     .welcome-subtitle {
-      font-size: 15px;
+      font-size: clamp(13px, 1.5vw, 15px);
       color: #64748b;
-      margin: 0 0 20px 0;
+      margin: 0 0 clamp(12px, 2vh, 18px) 0;
     }
     .tag-pill {
       display: inline-block;
@@ -67,17 +70,17 @@ import { Component } from '@angular/core';
       font-size: 13px;
       font-weight: 600;
       border-radius: 9999px;
-      margin-bottom: 24px;
+      margin-bottom: clamp(14px, 2.5vh, 22px);
     }
     .divider {
       height: 1px;
       background: #f1f5f9;
-      margin-bottom: 24px;
+      margin-bottom: clamp(14px, 2.5vh, 22px);
     }
     .welcome-instructions {
-      font-size: 14px;
+      font-size: clamp(12.5px, 1.4vw, 14px);
       color: #64748b;
-      line-height: 1.6;
+      line-height: 1.5;
       margin: 0;
     }
   `]
