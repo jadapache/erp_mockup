@@ -12,47 +12,49 @@
   (cdkDragEnded)="onDragEnded($event)"
   (mousedown)="activate.emit(window().id)"
 >
-  <!-- Botones flotantes superpuestos sobre el componente (sin barra visible) -->
-  <div class="floating-window-controls" (mousedown)="$event.stopPropagation()">
-    <button
-      type="button"
-      class="ctrl-btn"
-      title="Minimizar"
-      (click)="minimize.emit(window().id)"
-    >
-      <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor">
-        <rect y="7" width="16" height="2" rx="1" />
-      </svg>
-    </button>
-
-    <button
-      type="button"
-      class="ctrl-btn"
-      title="Maximizar / Restaurar"
-      (click)="maximize.emit(window().id)"
-    >
-      @if (window().maximized) {
-        <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8">
-          <rect x="1" y="4" width="9" height="9" rx="1" />
-          <path d="M4 1h9a1 1 0 0 1 1 1v9" />
+  <!-- Separación para los botones de control -->
+  <div class="mdi-drag-spacer" cdkDragHandle>
+    <div class="floating-window-controls" (mousedown)="$event.stopPropagation()">
+      <button
+        type="button"
+        class="ctrl-btn"
+        title="Minimizar"
+        (click)="minimize.emit(window().id)"
+      >
+        <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor">
+          <rect y="7" width="16" height="2" rx="1" />
         </svg>
-      } @else {
-        <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8">
-          <rect x="1.5" y="1.5" width="13" height="13" rx="1" />
-        </svg>
-      }
-    </button>
+      </button>
 
-    <button
-      type="button"
-      class="ctrl-btn close-btn"
-      title="Cerrar"
-      (click)="close.emit(window().id)"
-    >
-      <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M2 2l12 12M14 2L2 14" />
-      </svg>
-    </button>
+      <button
+        type="button"
+        class="ctrl-btn"
+        title="Maximizar / Restaurar"
+        (click)="maximize.emit(window().id)"
+      >
+        @if (window().maximized) {
+          <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="1" y="4" width="9" height="9" rx="1" />
+            <path d="M4 1h9a1 1 0 0 1 1 1v9" />
+          </svg>
+        } @else {
+          <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="1.5" y="1.5" width="13" height="13" rx="1" />
+          </svg>
+        }
+      </button>
+
+      <button
+        type="button"
+        class="ctrl-btn close-btn"
+        title="Cerrar"
+        (click)="close.emit(window().id)"
+      >
+        <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M2 2l12 12M14 2L2 14" />
+        </svg>
+      </button>
+    </div>
   </div>
 
   <div class="mdi-content">
