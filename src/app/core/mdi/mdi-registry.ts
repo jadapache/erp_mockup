@@ -1,7 +1,7 @@
 import { Type } from '@angular/core';
 import { InicioViewComponent } from '../mdi/components/inicio-view.component';
-import { AsociarProductosComponent } from '../../modules/contratos/asociar-productos.component';
-import { CondicionesTarifaComponent } from '../../modules/contratos/condiciones-tarifa.component';
+import { AsociarProductosComponent } from '../../modules/con_module/asociar-productos.component';
+import { CondicionesTarifaComponent } from '../../modules/con_module/condiciones-tarifa.component';
 import {
   ContratanteComponent,
   EntidadesComponent,
@@ -9,8 +9,11 @@ import {
   TarifasComponent,
   DestinosPaquetesComponent,
   ProximoVencerComponent
-} from '../../modules/contratos/contratos-pages.component';
+} from '../../modules/con_module/contratos-pages.component';
 import { GenericModuleViewComponent } from '../../modules/common/generic-module-view.component';
+import { DivisionPoliticaComponent } from '../../modules/apl_module/division-politica.component';
+import { NumeracionComponent } from '../../modules/apl_module/numeracion.component';
+import { DocumentosValoresPagoComponent } from '../../modules/apl_module/documentos-valores-pago.component';
 
 export interface FormDefinition {
   id: string;
@@ -97,6 +100,48 @@ export const MDI_FORMS: Record<string, FormDefinition> = {
     component: ProximoVencerComponent,
     width: 780,
     height: 480
+  },
+  divisionPolitica: {
+    id: 'divisionPolitica',
+    title: 'División Política Internacional',
+    component: DivisionPoliticaComponent,
+    width: 920,
+    height: 560
+  },
+  mnu_apl_ento_dipo: {
+    id: 'mnu_apl_ento_dipo',
+    title: 'División Política Internacional',
+    component: DivisionPoliticaComponent,
+    width: 920,
+    height: 560
+  },
+  documentosValoresPago: {
+    id: 'documentosValoresPago',
+    title: 'Documentos Valores de Pago',
+    component: DocumentosValoresPagoComponent,
+    width: 940,
+    height: 580
+  },
+  mnu_apl_ento_dpag: {
+    id: 'mnu_apl_ento_dpag',
+    title: 'Documentos Valores de Pago',
+    component: DocumentosValoresPagoComponent,
+    width: 940,
+    height: 580
+  },
+  numeracion: {
+    id: 'numeracion',
+    title: 'Numeración',
+    component: NumeracionComponent,
+    width: 900,
+    height: 520
+  },
+  mnu_apl_ento_nume: {
+    id: 'mnu_apl_ento_nume',
+    title: 'Numeración',
+    component: NumeracionComponent,
+    width: 900,
+    height: 520
   }
 };
 
