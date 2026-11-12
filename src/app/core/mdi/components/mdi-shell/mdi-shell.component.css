@@ -516,3 +516,75 @@
   color: #97a0b0;
   font-style: italic;
 }
+
+
+/* SNAP DOCK PREVIEWS AND SPLITTER */
+.dock-preview-active {
+  position: absolute;
+  background: rgba(37, 99, 235, 0.15);
+  border: 2px dashed #2563eb;
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 900;
+  transition: all 0.08s ease-out;
+  box-sizing: border-box;
+}
+
+.dock-preview-available {
+  position: absolute;
+  background: rgba(100, 116, 139, 0.08);
+  border: 2px dashed #94a3b8;
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 890;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.dock-available-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+  pointer-events: none;
+}
+
+.dock-splitter {
+  position: absolute;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  user-select: none;
+}
+
+.dock-splitter::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 2px;
+  background: #cbd5e1;
+  transition: background 0.15s ease;
+}
+
+.dock-splitter:hover::after {
+  background: #2563eb;
+}
+
+.dock-splitter-grip {
+  position: relative;
+  z-index: 1;
+  width: 4px;
+  height: 24px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 3px;
+}

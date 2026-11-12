@@ -9,6 +9,9 @@
   [style.z-index]="window().zIndex"
   [class.active]="window().active"
   [class.maximized]="window().maximized"
+  [class.docked]="!!window().dockedPosition"
+  (cdkDragStarted)="onDragStart()"
+  (cdkDragMoved)="onDragMoved($event)"
   (cdkDragEnded)="onDragEnded($event)"
   (mousedown)="activate.emit(window().id)"
 >
@@ -65,7 +68,7 @@
     <ng-container *ngComponentOutlet="window().component"></ng-container>
   </div>
 
-  @if (!window().maximized) {
+  @if (!window().maximized && !window().dockedPosition) {
     <div
       class="resize-handle"
       title="Redimensionar"

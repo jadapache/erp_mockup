@@ -53,6 +53,16 @@
   transform: none !important;
 }
 
+.mdi-window.docked {
+  border-radius: 0;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+.mdi-window.docked .mdi-titlebar,
+.mdi-window.docked .mdi-content {
+  border-radius: 0;
+}
+
 .mdi-titlebar {
   height: 24px;
   min-height: 24px;

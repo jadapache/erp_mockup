@@ -1,17 +1,48 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { Type } from '@angular/core';
-import { MdiWindow } from '../models/mdi-window.model';
+import { DockOrientation, DockPosition, MdiDockState, MdiWindow } from '../models/mdi-window.model';
+import {
+  WorkspaceRect,
+  detectDockCandidate,
+  getPositionOrientation,
+  getOppositePosition,
+  canAccommodateDock,
+  calculateDockGeometries,
+  getPreviewRect,
+  MIN_WINDOW_WIDTH,
+  MIN_WINDOW_HEIGHT
+} from './mdi-dock-utils';
+
+export interface DockPreviewInfo {
+  activeRect: { x: number; y: number; width: number; height: number };
+  availableRect?: { x: number; y: number; width: number; height: number };
+}
 
 @Injectable({ providedIn: 'root' })
 export class MdiWindowService {
   private readonly windowsState = signal<MdiWindow[]>([]);
   readonly windows = this.windowsState.asReadonly();
 
+  private readonly dockStateSignal = signal<MdiDockState | null>(null);
+  readonly dockState = this.dockStateSignal.asReadonly();
+
+  private readonly previewSignal = signal<DockPreviewInfo | null>(null);
+  readonly dockPreview = this.previewSignal.asReadonly();
+
+  private lastWorkspaceRect: WorkspaceRect = { width: 1200, height: 800 };
+
   readonly activeWindow = computed(() =>
     this.windowsState().find(w => w.active)
   );
 
   private nextZIndex = 100;
+  private readonly DOCK_BASE_Z_INDEX = 10;
+
+  setWorkspaceRect(rect: WorkspaceRect): void {
+    if (rect.width <= 0 || rect.height <= 0) return;
+    this.lastWorkspaceRect = rect;
+    this.recalculateDockGeometries();
+  }
 
   open(title: string, component: Type<unknown>, width = 760, height = 480): string {
     const existing = this.windowsState().find(w => w.title === title);
@@ -54,23 +85,32 @@ export class MdiWindowService {
   }
 
   activate(id: string): void {
+    const isDocked = (w: MdiWindow) => !!w.dockedPosition;
     this.windowsState.update(windows =>
       windows.map(w => ({
         ...w,
         active: w.id === id && !w.minimized,
         maximized: w.id === id ? w.maximized : false,
         ...(w.id !== id && w.maximized && w.restoreGeometry ? w.restoreGeometry : {}),
-        zIndex: w.id === id ? ++this.nextZIndex : w.zIndex
+        zIndex: w.id === id
+          ? (isDocked(w) ? this.DOCK_BASE_Z_INDEX + 1 : ++this.nextZIndex)
+          : (isDocked(w) ? this.DOCK_BASE_Z_INDEX : w.zIndex)
       }))
     );
   }
 
   close(id: string): void {
+    this.handleWindowRemovalFromDock(id);
     this.windowsState.update(windows => windows.filter(w => w.id !== id));
     this.activateLast();
   }
 
   minimize(id: string): void {
+    const dock = this.dockStateSignal();
+    if (dock && (dock.firstWindowId === id || dock.secondWindowId === id)) {
+      this.undockRemainingToFloating(id);
+    }
+
     this.windowsState.update(windows =>
       windows.map(w => (w.id === id ? { ...w, minimized: true, active: false } : w))
     );
@@ -85,24 +125,14 @@ export class MdiWindowService {
   }
 
   maximize(id: string): void {
-    this.windowsState.update(windows =>
-      windows.map(w => {
-        if (w.id !== id) return w;
-        if (w.maximized) {
-          return {
-            ...w,
-            ...w.restoreGeometry,
-            maximized: false,
-            restoreGeometry: undefined
-          };
-        }
-        return {
-          ...w,
-          restoreGeometry: { x: w.x, y: w.y, width: w.width, height: w.height },
-          maximized: true
-        };
-      })
-    );
+    const target = this.windowsState().find(w => w.id === id);
+    if (!target) return;
+
+    if (target.maximized) {
+      this.restoreFromMaximize(target);
+    } else {
+      this.applyMaximize(target);
+    }
     this.activate(id);
   }
 
@@ -115,6 +145,7 @@ export class MdiWindowService {
   }
 
   cascade(): void {
+    this.clearDocking();
     let offset = 20;
     this.windowsState.update(windows =>
       windows.map(w => {
@@ -133,6 +164,7 @@ export class MdiWindowService {
   }
 
   tileHorizontal(containerWidth: number, containerHeight: number): void {
+    this.clearDocking();
     const visible = this.windowsState().filter(w => !w.minimized);
     if (!visible.length) return;
     const itemHeight = Math.floor(containerHeight / visible.length);
@@ -154,6 +186,7 @@ export class MdiWindowService {
   }
 
   tileVertical(containerWidth: number, containerHeight: number): void {
+    this.clearDocking();
     const visible = this.windowsState().filter(w => !w.minimized);
     if (!visible.length) return;
     const itemWidth = Math.floor(containerWidth / visible.length);
@@ -171,6 +204,283 @@ export class MdiWindowService {
           maximized: false
         };
       })
+    );
+  }
+
+  onDragStart(id: string): void {
+    const win = this.windowsState().find(w => w.id === id);
+    if (!win || !win.dockedPosition) return;
+    this.undockWindowOnDrag(win);
+  }
+
+  onDragMove(id: string, currentRect: { x: number; y: number; width: number; height: number }): void {
+    const pos = detectDockCandidate(
+      currentRect.x,
+      currentRect.y,
+      currentRect.width,
+      currentRect.height,
+      this.lastWorkspaceRect
+    );
+
+    if (!pos) {
+      this.previewSignal.set(null);
+      return;
+    }
+
+    const candidate = this.evaluateDockCandidate(id, pos);
+    if (!candidate) {
+      this.previewSignal.set(null);
+      return;
+    }
+
+    const activeRect = getPreviewRect(pos, this.lastWorkspaceRect, 0.5);
+    let availableRect: { x: number; y: number; width: number; height: number } | undefined;
+
+    if (!this.dockStateSignal()) {
+      const opp = getOppositePosition(pos);
+      availableRect = getPreviewRect(opp, this.lastWorkspaceRect, 0.5);
+    }
+
+    this.previewSignal.set({ activeRect, availableRect });
+  }
+
+  onDragEnd(id: string, currentRect: { x: number; y: number; width: number; height: number }): void {
+    this.previewSignal.set(null);
+
+    const pos = detectDockCandidate(
+      currentRect.x,
+      currentRect.y,
+      currentRect.width,
+      currentRect.height,
+      this.lastWorkspaceRect
+    );
+
+    if (!pos) {
+      this.move(id, Math.max(0, currentRect.x), Math.max(0, currentRect.y));
+      return;
+    }
+
+    const candidate = this.evaluateDockCandidate(id, pos);
+    if (!candidate) {
+      this.move(id, Math.max(0, currentRect.x), Math.max(0, currentRect.y));
+      return;
+    }
+
+    this.applyDock(id, pos);
+  }
+
+  setSplitRatio(ratio: number): void {
+    const dock = this.dockStateSignal();
+    if (!dock) return;
+    const clamped = Math.max(0.15, Math.min(0.85, ratio));
+    this.dockStateSignal.set({ ...dock, ratio: clamped });
+    this.recalculateDockGeometries();
+  }
+
+  private evaluateDockCandidate(id: string, pos: DockPosition): boolean {
+    const dock = this.dockStateSignal();
+    const targetOrient = getPositionOrientation(pos);
+
+    if (!dock) {
+      return canAccommodateDock(targetOrient, this.lastWorkspaceRect);
+    }
+
+    if (dock.firstWindowId === id || dock.secondWindowId === id) {
+      return false;
+    }
+
+    if (dock.secondWindowId) {
+      return false;
+    }
+
+    if (dock.orientation !== targetOrient) {
+      return false;
+    }
+
+    const firstWin = this.windowsState().find(w => w.id === dock.firstWindowId);
+    if (!firstWin || !firstWin.dockedPosition) {
+      return false;
+    }
+
+    const expectedSecondPos = getOppositePosition(firstWin.dockedPosition);
+    return pos === expectedSecondPos;
+  }
+
+  private applyDock(id: string, pos: DockPosition): void {
+    const dock = this.dockStateSignal();
+    const orient = getPositionOrientation(pos);
+    const win = this.windowsState().find(w => w.id === id);
+    if (!win) return;
+
+    const restoreGeom = win.restoreGeometry ?? {
+      x: win.x,
+      y: win.y,
+      width: win.width,
+      height: win.height
+    };
+
+    if (!dock) {
+      this.dockStateSignal.set({
+        orientation: orient,
+        firstWindowId: id,
+        ratio: 0.5
+      });
+
+      this.updateWindow(id, {
+        dockedPosition: pos,
+        restoreGeometry: restoreGeom,
+        zIndex: this.DOCK_BASE_Z_INDEX
+      });
+    } else {
+      this.dockStateSignal.set({
+        ...dock,
+        secondWindowId: id
+      });
+
+      this.updateWindow(id, {
+        dockedPosition: pos,
+        restoreGeometry: restoreGeom,
+        zIndex: this.DOCK_BASE_Z_INDEX
+      });
+    }
+
+    this.recalculateDockGeometries();
+    this.activate(id);
+  }
+
+  private undockWindowOnDrag(win: MdiWindow): void {
+    const geom = win.restoreGeometry ?? {
+      x: Math.max(20, win.x + 20),
+      y: Math.max(20, win.y + 20),
+      width: 760,
+      height: 480
+    };
+
+    this.handleWindowRemovalFromDock(win.id);
+
+    this.updateWindow(win.id, {
+      dockedPosition: undefined,
+      restoreGeometry: undefined,
+      zIndex: ++this.nextZIndex,
+      width: geom.width,
+      height: geom.height
+    });
+  }
+
+  private handleWindowRemovalFromDock(removedId: string): void {
+    const dock = this.dockStateSignal();
+    if (!dock) return;
+
+    if (dock.firstWindowId !== removedId && dock.secondWindowId !== removedId) {
+      return;
+    }
+
+    const remainingId = dock.firstWindowId === removedId ? dock.secondWindowId : dock.firstWindowId;
+    this.dockStateSignal.set(null);
+
+    if (remainingId) {
+      this.restoreDockedWindowToFloating(remainingId);
+    }
+  }
+
+  private undockRemainingToFloating(minimizedId: string): void {
+    const dock = this.dockStateSignal();
+    if (!dock) return;
+
+    const remainingId = dock.firstWindowId === minimizedId ? dock.secondWindowId : dock.firstWindowId;
+    this.dockStateSignal.set(null);
+
+    if (remainingId) {
+      this.restoreDockedWindowToFloating(remainingId);
+    }
+
+    const minWin = this.windowsState().find(w => w.id === minimizedId);
+    if (minWin) {
+      const geom = minWin.restoreGeometry;
+      this.updateWindow(minimizedId, {
+        dockedPosition: undefined,
+        restoreGeometry: undefined,
+        ...(geom ? { x: geom.x, y: geom.y, width: geom.width, height: geom.height } : {})
+      });
+    }
+  }
+
+  private restoreDockedWindowToFloating(id: string): void {
+    const win = this.windowsState().find(w => w.id === id);
+    if (!win) return;
+
+    const geom = win.restoreGeometry ?? {
+      x: Math.max(20, win.x),
+      y: Math.max(20, win.y),
+      width: Math.min(760, this.lastWorkspaceRect.width - 40),
+      height: Math.min(480, this.lastWorkspaceRect.height - 40)
+    };
+
+    this.updateWindow(id, {
+      dockedPosition: undefined,
+      restoreGeometry: undefined,
+      x: geom.x,
+      y: geom.y,
+      width: geom.width,
+      height: geom.height
+    });
+  }
+
+  private restoreFromMaximize(target: MdiWindow): void {
+    const restore = target.restoreGeometry;
+    this.updateWindow(target.id, {
+      maximized: false,
+      ...(restore ? { x: restore.x, y: restore.y, width: restore.width, height: restore.height } : {})
+    });
+    this.recalculateDockGeometries();
+  }
+
+  private applyMaximize(target: MdiWindow): void {
+    this.updateWindow(target.id, {
+      restoreGeometry: { x: target.x, y: target.y, width: target.width, height: target.height },
+      maximized: true
+    });
+  }
+
+  private recalculateDockGeometries(): void {
+    const dock = this.dockStateSignal();
+    if (!dock) return;
+
+    const firstWin = this.windowsState().find(w => w.id === dock.firstWindowId);
+    if (!firstWin || !firstWin.dockedPosition) {
+      this.clearDocking();
+      return;
+    }
+
+    const secondWin = dock.secondWindowId
+      ? this.windowsState().find(w => w.id === dock.secondWindowId)
+      : undefined;
+
+    const geoms = calculateDockGeometries(
+      dock.orientation,
+      firstWin.dockedPosition,
+      dock.ratio,
+      this.lastWorkspaceRect,
+      !!secondWin
+    );
+
+    this.windowsState.update(windows =>
+      windows.map(w => {
+        if (w.id === firstWin.id && !w.maximized) {
+          return { ...w, ...geoms.first };
+        }
+        if (secondWin && w.id === secondWin.id && geoms.second && !w.maximized) {
+          return { ...w, ...geoms.second };
+        }
+        return w;
+      })
+    );
+  }
+
+  private clearDocking(): void {
+    this.dockStateSignal.set(null);
+    this.windowsState.update(windows =>
+      windows.map(w => (w.dockedPosition ? { ...w, dockedPosition: undefined } : w))
     );
   }
 

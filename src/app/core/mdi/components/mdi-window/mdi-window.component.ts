@@ -1,7 +1,15 @@
 import { Component, input, output } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
-import { CdkDrag, CdkDragHandle, CdkDragEnd } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragHandle, CdkDragStart, CdkDragMove, CdkDragEnd } from '@angular/cdk/drag-drop';
 import { MdiWindow } from '../../models/mdi-window.model';
+
+export interface DragPositionPayload {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
 
 @Component({
   selector: 'app-mdi-window',
@@ -10,7 +18,8 @@ import { MdiWindow } from '../../models/mdi-window.model';
   templateUrl: './mdi-window.component.html',
   styleUrl: './mdi-window.component.css',
   host: {
-    '[class.is-maximized]': 'window().maximized'
+    '[class.is-maximized]': 'window().maximized',
+    '[class.is-docked]': '!!window().dockedPosition'
   }
 })
 export class MdiWindowComponent {
@@ -20,15 +29,35 @@ export class MdiWindowComponent {
   close = output<string>();
   minimize = output<string>();
   maximize = output<string>();
-  move = output<{ id: string; x: number; y: number }>();
+  dragStarted = output<string>();
+  dragMoved = output<DragPositionPayload>();
+  dragEnded = output<DragPositionPayload>();
   resize = output<{ id: string; width: number; height: number }>();
 
-  onDragEnded(event: CdkDragEnd): void {
-    const position = event.source.getFreeDragPosition();
-    this.move.emit({
+  onDragStart(): void {
+    this.activate.emit(this.window().id);
+    this.dragStarted.emit(this.window().id);
+  }
+
+  onDragMoved(event: CdkDragMove): void {
+    const pos = event.source.getFreeDragPosition();
+    this.dragMoved.emit({
       id: this.window().id,
-      x: Math.max(0, position.x),
-      y: Math.max(0, position.y)
+      x: pos.x,
+      y: pos.y,
+      width: this.window().width,
+      height: this.window().height
+    });
+  }
+
+  onDragEnded(event: CdkDragEnd): void {
+    const pos = event.source.getFreeDragPosition();
+    this.dragEnded.emit({
+      id: this.window().id,
+      x: pos.x,
+      y: pos.y,
+      width: this.window().width,
+      height: this.window().height
     });
   }
 

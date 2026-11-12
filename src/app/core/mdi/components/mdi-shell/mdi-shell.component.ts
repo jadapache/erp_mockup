@@ -1,6 +1,15 @@
-import { Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  computed,
+  inject,
+  signal,
+  viewChild,
+  AfterViewInit,
+  OnDestroy
+} from '@angular/core';
 import { MdiWindowService } from '../../services/mdi-window.service';
-import { MdiWindowComponent } from '../mdi-window/mdi-window.component';
+import { MdiWindowComponent, DragPositionPayload } from '../mdi-window/mdi-window.component';
 import { getOrCreateForm } from '../../mdi-registry';
 import { MENU_MODULES } from '../../menu-data';
 import { MenuModule, MenuItem } from '../../models/menu.model';
@@ -14,15 +23,20 @@ import { MenuNodeComponent } from '../menu-node/menu-node.component';
   templateUrl: './mdi-shell.component.html',
   styleUrl: './mdi-shell.component.css'
 })
-export class MdiShellComponent {
+export class MdiShellComponent implements AfterViewInit, OnDestroy {
   readonly mdi = inject(MdiWindowService);
   readonly windows = this.mdi.windows;
+  readonly dockState = this.mdi.dockState;
+  readonly dockPreview = this.mdi.dockPreview;
   readonly workspaceRef = viewChild<ElementRef<HTMLElement>>('workspace');
 
   readonly allModules: MenuModule[] = MENU_MODULES;
   readonly selectedModuleCode = signal<string>('adm');
   readonly sidebarCollapsed = signal<boolean>(false);
   readonly searchQuery = signal<string>('');
+
+  private resizeObserver?: ResizeObserver;
+  private isResizingSplitter = false;
 
   readonly currentModule = computed<MenuModule>(() => {
     const code = this.selectedModuleCode();
@@ -36,7 +50,40 @@ export class MdiShellComponent {
     return this.filterTree(items, q);
   });
 
-  constructor() {}
+  readonly splitterStyle = computed(() => {
+    const dock = this.dockState();
+    if (!dock || !dock.secondWindowId) return null;
+
+    const el = this.workspaceRef()?.nativeElement;
+    const totalW = el ? el.clientWidth : 1200;
+    const totalH = el ? el.clientHeight : 800;
+
+    const left = Math.round(totalW * dock.ratio);
+    return {
+      left: `${left - 4}px`,
+      top: '0px',
+      width: '8px',
+      height: `${totalH}px`,
+      cursor: 'col-resize'
+    };
+  });
+
+  ngAfterViewInit(): void {
+    this.updateWorkspaceDimensions();
+    const el = this.workspaceRef()?.nativeElement;
+    if (el && typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => {
+        this.updateWorkspaceDimensions();
+      });
+      this.resizeObserver.observe(el);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
+  }
 
   toggleSidebar(): void {
     this.sidebarCollapsed.update(v => !v);
@@ -85,6 +132,53 @@ export class MdiShellComponent {
     const w = el ? el.clientWidth : (win ? win.innerWidth - 300 : 1000);
     const h = el ? el.clientHeight : (win ? win.innerHeight - 90 : 700);
     this.mdi.tileVertical(w, h);
+  }
+
+  onWindowDragStart(id: string): void {
+    this.mdi.onDragStart(id);
+  }
+
+  onWindowDragMove(payload: DragPositionPayload): void {
+    this.mdi.onDragMove(payload.id, payload);
+  }
+
+  onWindowDragEnd(payload: DragPositionPayload): void {
+    this.mdi.onDragEnd(payload.id, payload);
+  }
+
+  onSplitterMouseDown(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const dock = this.dockState();
+    const el = this.workspaceRef()?.nativeElement;
+    if (!dock || !dock.secondWindowId || !el) return;
+
+    this.isResizingSplitter = true;
+    const rect = el.getBoundingClientRect();
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      if (!this.isResizingSplitter) return;
+      const ratio = (moveEvent.clientX - rect.left) / rect.width;
+      this.mdi.setSplitRatio(ratio);
+    };
+
+    const onMouseUp = () => {
+      this.isResizingSplitter = false;
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  }
+
+  private updateWorkspaceDimensions(): void {
+    const el = this.workspaceRef()?.nativeElement;
+    if (!el) return;
+    this.mdi.setWorkspaceRect({
+      width: el.clientWidth,
+      height: el.clientHeight
+    });
   }
 
   private filterTree(nodes: MenuItem[], query: string): MenuItem[] {

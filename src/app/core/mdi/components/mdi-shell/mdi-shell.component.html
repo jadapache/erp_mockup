@@ -134,6 +134,44 @@
           <app-inicio-view />
         </div>
 
+        <!-- Snap Dock Previews -->
+        @if (dockPreview(); as preview) {
+          <div
+            class="dock-preview-active"
+            [style.left.px]="preview.activeRect.x"
+            [style.top.px]="preview.activeRect.y"
+            [style.width.px]="preview.activeRect.width"
+            [style.height.px]="preview.activeRect.height"
+          ></div>
+
+          @if (preview.availableRect; as avail) {
+            <div
+              class="dock-preview-available"
+              [style.left.px]="avail.x"
+              [style.top.px]="avail.y"
+              [style.width.px]="avail.width"
+              [style.height.px]="avail.height"
+            >
+              <div class="dock-available-label">Zona disponible para segunda ventana</div>
+            </div>
+          }
+        }
+
+        <!-- Splitter when two windows are docked -->
+        @if (splitterStyle(); as sStyle) {
+          <div
+            class="dock-splitter"
+            [style.left]="sStyle.left"
+            [style.top]="sStyle.top"
+            [style.width]="sStyle.width"
+            [style.height]="sStyle.height"
+            [style.cursor]="sStyle.cursor"
+            (mousedown)="onSplitterMouseDown($event)"
+          >
+            <div class="dock-splitter-grip"></div>
+          </div>
+        }
+
         @for (window of windows(); track window.id) {
           @if (!window.minimized) {
             <app-mdi-window
@@ -142,7 +180,9 @@
               (close)="mdi.close($event)"
               (minimize)="mdi.minimize($event)"
               (maximize)="mdi.maximize($event)"
-              (move)="mdi.move($event.id, $event.x, $event.y)"
+              (dragStarted)="onWindowDragStart($event)"
+              (dragMoved)="onWindowDragMove($event)"
+              (dragEnded)="onWindowDragEnd($event)"
               (resize)="mdi.resize($event.id, $event.width, $event.height)"
             />
           }
