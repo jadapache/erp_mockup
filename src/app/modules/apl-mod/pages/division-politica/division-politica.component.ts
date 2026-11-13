@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, signal, computed, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
@@ -21,9 +21,10 @@ type ViewMode = 'empty' | 'view' | 'edit' | 'create';
   templateUrl: './division-politica.component.html',
   styleUrls: ['./division-politica.component.css']
 })
-export class DivisionPoliticaComponent {
+export class DivisionPoliticaComponent implements OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly geoService = inject(DivisionPoliticaService);
+  private alertTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   readonly searchTerm = signal('');
   readonly selectedNode = signal<DivisionPoliticaItem | null>(null);
@@ -325,10 +326,28 @@ export class DivisionPoliticaComponent {
   }
 
   private triggerSuccess(msg: string): void {
+    if (this.alertTimeoutId) {
+      clearTimeout(this.alertTimeoutId);
+    }
     this.successMessage.set(msg);
+    this.alertTimeoutId = setTimeout(() => {
+      this.successMessage.set(null);
+      this.alertTimeoutId = null;
+    }, 3000);
   }
 
   dismissAlert(): void {
+    if (this.alertTimeoutId) {
+      clearTimeout(this.alertTimeoutId);
+      this.alertTimeoutId = null;
+    }
     this.successMessage.set(null);
+  }
+
+  ngOnDestroy(): void {
+    if (this.alertTimeoutId) {
+      clearTimeout(this.alertTimeoutId);
+      this.alertTimeoutId = null;
+    }
   }
 }

@@ -1,4 +1,16 @@
 <div class="page-container">
+  <div class="page-header">
+    <div class="header-left">
+      <h2 class="page-title">División Política Internacional</h2>
+      <div class="breadcrumbs">
+        <span>Adm. Plataforma</span> / <span class="active-crumb">División Política</span>
+      </div>
+    </div>
+    <button type="button" class="btn-action-primary" (click)="onCreateNewRoot()">
+      + Nuevo
+    </button>
+  </div>
+
   @if (successMessage()) {
     <div class="alert-banner">
       <div class="alert-content">
@@ -14,18 +26,6 @@
       <button type="button" class="alert-close" (click)="dismissAlert()">&times;</button>
     </div>
   }
-
-  <div class="page-header">
-    <div class="header-left">
-      <h2 class="page-title">División Política Internacional</h2>
-      <div class="breadcrumbs">
-        <span>Adm. Plataforma</span> / <span class="active-crumb">División Política</span>
-      </div>
-    </div>
-    <button type="button" class="btn-action-primary" (click)="onCreateNewRoot()">
-      + Nuevo
-    </button>
-  </div>
 
   <div class="content-body">
     <div class="grid-layout">
