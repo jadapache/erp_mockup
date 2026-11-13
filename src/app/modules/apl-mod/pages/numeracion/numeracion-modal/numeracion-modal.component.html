@@ -1,0 +1,19 @@
+<div class="modal-backdrop" (click)="cancel()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h4 class="modal-title">Nueva Numeración</h4>
+          <button type="button" class="btn-close-sm" (click)="cancel()">✕</button>
+        </div>
+        <div class="modal-body">
+          <label class="field-label required">Módulo</label>
+          <input type="text" class="field-input" placeholder="Nombre del módulo..." [value]="modulo()" (input)="modulo.set($any($event.target).value)" />
+          
+          <label class="field-label required" style="margin-top: 10px;">Prefijo</label>
+          <input type="text" class="field-input" placeholder="Prefijo..." [value]="prefijo()" (input)="prefijo.set($any($event.target).value)" />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="cancel()">Cancelar (Escape)</button>
+          <button type="button" class="btn-confirm" (click)="confirm()">Guardar (Enter)</button>
+        </div>
+      </div>
+    </div>

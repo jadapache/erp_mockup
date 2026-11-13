@@ -1,7 +1,7 @@
 import { Type } from '@angular/core';
 import { InicioViewComponent } from './components/inicio-view.component';
 import { AsociarProductosComponent } from '../../modules/con-mod/asociar-productos.component';
-import { CondicionesTarifaComponent } from '../../modules/con-mod/condiciones-tarifa.component';
+import { CondicionesTarifaComponent } from '../../modules/apl-mod/pages/condiciones-tarifa/condiciones-tarifa.component';
 import {
   ContratanteComponent,
   EntidadesComponent,
@@ -9,9 +9,9 @@ import {
   TarifasComponent,
   DestinosPaquetesComponent,
   ProximoVencerComponent
-} from '../../modules/con-mod/contratos-pages.component';
+} from '../../modules/apl-mod/pages/contratos-pages/contratos-pages.component';
 import { GenericModuleViewComponent } from '../../shared/components/generic-module-view.component';
-import { DivisionPoliticaComponent } from '../../modules/apl-mod/division-politica.component';
+import { DivisionPoliticaComponent } from '../../modules/apl-mod/pages/division-politica/division-politica.component';
 import { NumeracionComponent } from '../../modules/apl-mod/numeracion.component';
 import { DocumentosValoresPagoComponent } from '../../modules/apl-mod/documentos-valores-pago.component';
 import { CitasComponent } from '../../modules/adm-mod/citas.component';
