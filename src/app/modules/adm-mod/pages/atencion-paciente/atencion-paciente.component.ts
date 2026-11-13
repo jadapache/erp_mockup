@@ -17,6 +17,7 @@ export class AtencionPacienteComponent implements RefreshableForm {
 
   readonly activeTab = signal<'basicos' | 'ingreso' | 'vinculaciones' | 'accidente' | 'egreso' | 'requisitos'>('basicos');
   readonly atencionCount = signal(0);
+  readonly atencionEnEdicion = signal(false);
 
   constructor() {
     injectHotkey('Alt+N', () => this.nuevaAtencion(), {
@@ -34,6 +35,7 @@ export class AtencionPacienteComponent implements RefreshableForm {
   }
 
   nuevaAtencion(): void {
+    this.atencionEnEdicion.set(true);
     this.atencionCount.update(c => c + 1);
     this.setTab('basicos');
   }

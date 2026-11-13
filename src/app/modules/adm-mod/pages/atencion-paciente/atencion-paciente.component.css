@@ -64,6 +64,25 @@
       gap: 6px;
       cursor: pointer;
     }
+    .btn-action-save {
+      background: #7bb596;
+      border: none;
+      border-radius: 8px;
+      padding: 0 16px;
+      height: 38px;
+      font-size: 13px;
+      color: #ffffff;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: not-allowed;
+      opacity: 0.85;
+    }
+    .btn-action-save:disabled {
+      cursor: not-allowed;
+      opacity: 0.85;
+    }
     .content-body {
       flex: 1;
       padding: 20px 24px;
@@ -89,8 +108,21 @@
       border-bottom: 3px solid transparent;
       margin-bottom: -2px;
       transition: color 0.15s ease, border-color 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
     }
-    .tab-btn:hover {
+    .tab-lock-icon {
+      flex-shrink: 0;
+      color: inherit;
+    }
+    .tab-btn.tab-btn-disabled,
+    .tab-btn:disabled {
+      color: #64748b;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .tab-btn:not(:disabled):hover {
       color: #0284c7;
     }
     .tab-btn.active {
