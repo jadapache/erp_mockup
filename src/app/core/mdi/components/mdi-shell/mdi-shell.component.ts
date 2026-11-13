@@ -138,6 +138,19 @@ export class MdiShellComponent implements OnInit, AfterViewInit, OnDestroy {
       () => this.appHotkeys()['mdi.nextWindow'],
       () => this.coreCommands.activateNextWindow()
     );
+
+    injectHotkey(
+      'Control+E',
+      () => this.openFormById('mnu_Adm_Proc_Aten', 'Atención del Paciente'),
+      () => ({
+        enabled: this.selectedModuleCode() === 'adm',
+        meta: {
+          name: 'Abrir Atención del Paciente',
+          description: 'Abrir o enfocar la ventana de Atención del Paciente',
+          category: 'Módulo' as const
+        }
+      })
+    );
   }
 
   focusGlobalSearch(): void {
