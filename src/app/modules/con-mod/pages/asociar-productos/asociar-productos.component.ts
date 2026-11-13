@@ -19,8 +19,8 @@ export class AsociarProductosComponent implements RefreshableForm {
   readonly saveCount = signal(0);
 
   constructor() {
-    // Registrar atajo de instancia Control+S
-    injectHotkey('Control+S', () => this.save(), {
+    // Registrar atajo de instancia Control+G
+    injectHotkey('Control+G', () => this.save(), {
       meta: {
         name: 'Guardar cambios',
         description: 'Guardar la asociación de productos en el contrato actual',
