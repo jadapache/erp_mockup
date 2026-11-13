@@ -1,7 +1,7 @@
 import { Type } from '@angular/core';
 import { InicioViewComponent } from './components/inicio-view.component';
-import { AsociarProductosComponent } from '../../modules/con-mod/asociar-productos.component';
-import { CondicionesTarifaComponent } from '../../modules/apl-mod/pages/condiciones-tarifa/condiciones-tarifa.component';
+import { AsociarProductosComponent } from '../../modules/con-mod/pages/asociar-productos/asociar-productos.component';
+import { CondicionesTarifaComponent } from '../../modules/con-mod/pages/condiciones-tarifa/condiciones-tarifa.component';
 import {
   ContratanteComponent,
   EntidadesComponent,
@@ -9,14 +9,14 @@ import {
   TarifasComponent,
   DestinosPaquetesComponent,
   ProximoVencerComponent
-} from '../../modules/apl-mod/pages/contratos-pages/contratos-pages.component';
+} from '../../modules/con-mod/pages/contratos-pages/contratos-pages.component';
 import { GenericModuleViewComponent } from '../../shared/components/generic-module-view.component';
 import { DivisionPoliticaComponent } from '../../modules/apl-mod/pages/division-politica/division-politica.component';
-import { NumeracionComponent } from '../../modules/apl-mod/numeracion.component';
-import { DocumentosValoresPagoComponent } from '../../modules/apl-mod/documentos-valores-pago.component';
-import { CitasComponent } from '../../modules/adm-mod/citas.component';
-import { AlertasAdmisionesComponent } from '../../modules/adm-mod/alertas-admisiones.component';
-import { AtencionPacienteComponent } from '../../modules/adm-mod/atencion-paciente.component';
+import { NumeracionComponent } from '../../modules/apl-mod/pages/numeracion/numeracion.component';
+import { DocumentosValoresPagoComponent } from '../../modules/apl-mod/pages/documentos-valores-pago/documentos-valores-pago.component';
+import { CitasComponent } from '../../modules/adm-mod/pages/citas/citas.component';
+import { AlertasAdmisionesComponent } from '../../modules/adm-mod/pages/alertas-admisiones/alertas-admisiones.component';
+import { AtencionPacienteComponent } from '../../modules/adm-mod/pages/atencion-paciente/atencion-paciente.component';
 
 export interface FormDefinition {
   id: string;

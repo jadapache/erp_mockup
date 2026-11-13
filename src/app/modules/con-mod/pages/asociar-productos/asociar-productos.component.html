@@ -1,0 +1,43 @@
+<div class="page-container">
+      <div class="page-header">
+        <div class="header-left">
+          <h2 class="page-title">Asociar Productos a Contratos</h2>
+          <div class="breadcrumbs">
+            <span>Contratos</span> / <span>Configuración</span> / <span class="active-crumb">Asociar Productos</span>
+          </div>
+        </div>
+        <div class="status-indicator">
+          @if (saveStatus()) {
+            <span class="save-status-badge">{{ saveStatus() }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="content-body">
+        <div class="content-box">
+          <label class="form-label">Contrato</label>
+          <div class="form-row">
+            <select class="form-select">
+              <option>Seleccione un contrato...</option>
+              <option>C-9000 - TERCERO CONTRATO PRUEBA (HU-CON-009)</option>
+              <option>C-9001 - TERCERO CONTRATO PRUEBA (HU-CON-009)</option>
+              <option>C-9002 - TERCERO CONTRATO PRUEBA (HU-CON-009)</option>
+            </select>
+            <button class="btn btn-primary">Cargar productos</button>
+          </div>
+
+          <div class="field-readonly">
+            <span>Productos configurados</span>
+          </div>
+
+          <div class="actions-row">
+            <div class="action-links">
+              <button class="btn-link">Habilitar todos</button>
+              <button class="btn-link">Inhabilitar todos</button>
+            </div>
+            <button class="btn btn-primary">Agregar productos</button>
+            <button class="btn btn-primary btn-save" (click)="save()">Guardar (Ctrl+S)</button>
+          </div>
+        </div>
+      </div>
+    </div>
