@@ -1,4 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject, DestroyRef } from '@angular/core';
+import { injectHotkey } from '@tanstack/angular-hotkeys';
+import { MDI_WINDOW_ID } from '../../core/mdi/models/mdi-tokens';
+import { CoreCommandsService } from '../../core/commands/core-commands.service';
+import { RefreshableForm } from '../../core/commands/models/app-command.model';
 
 @Component({
   selector: 'app-atencion-paciente',
@@ -14,7 +18,7 @@ import { Component, signal } from '@angular/core';
           </div>
         </div>
         <div class="header-actions">
-          <button type="button" class="btn-action-primary">+ Nueva atención</button>
+          <button type="button" class="btn-action-primary" (click)="nuevaAtencion()">+ Nueva atención (Alt+N)</button>
           <button type="button" class="btn-action-outline">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
@@ -24,6 +28,7 @@ import { Component, signal } from '@angular/core';
           </button>
         </div>
       </div>
+
 
       <div class="content-body">
         <!-- Barra de Pestañas / Tabs -->
@@ -735,8 +740,37 @@ import { Component, signal } from '@angular/core';
     }
   `]
 })
-export class AtencionPacienteComponent {
+export class AtencionPacienteComponent implements RefreshableForm {
+  readonly windowId = inject(MDI_WINDOW_ID, { optional: true });
+  private readonly coreCommands = inject(CoreCommandsService);
+  private readonly destroyRef = inject(DestroyRef);
+
   readonly activeTab = signal<'basicos' | 'ingreso' | 'vinculaciones' | 'accidente' | 'egreso' | 'requisitos'>('basicos');
+  readonly atencionCount = signal(0);
+
+  constructor() {
+    injectHotkey('Alt+N', () => this.nuevaAtencion(), {
+      meta: {
+        name: 'Nueva atención',
+        description: 'Crear un nuevo registro de atención para el paciente',
+        category: 'Módulo'
+      }
+    });
+
+    if (this.windowId) {
+      const unregister = this.coreCommands.registerRefreshable(this.windowId, this);
+      this.destroyRef.onDestroy(() => unregister());
+    }
+  }
+
+  nuevaAtencion(): void {
+    this.atencionCount.update(c => c + 1);
+    this.setTab('basicos');
+  }
+
+  refreshView(): void {
+    this.setTab('basicos');
+  }
 
   setTab(tab: 'basicos' | 'ingreso' | 'vinculaciones' | 'accidente' | 'egreso' | 'requisitos'): void {
     this.activeTab.set(tab);

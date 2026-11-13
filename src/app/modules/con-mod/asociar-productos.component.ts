@@ -1,4 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal, DestroyRef } from '@angular/core';
+import { injectHotkey } from '@tanstack/angular-hotkeys';
+import { MDI_WINDOW_ID } from '../../core/mdi/models/mdi-tokens';
+import { CoreCommandsService } from '../../core/commands/core-commands.service';
+import { RefreshableForm } from '../../core/commands/models/app-command.model';
 
 @Component({
   selector: 'app-asociar-productos',
@@ -11,6 +15,11 @@ import { Component } from '@angular/core';
           <div class="breadcrumbs">
             <span>Contratos</span> / <span>Configuración</span> / <span class="active-crumb">Asociar Productos</span>
           </div>
+        </div>
+        <div class="status-indicator">
+          @if (saveStatus()) {
+            <span class="save-status-badge">{{ saveStatus() }}</span>
+          }
         </div>
       </div>
 
@@ -37,7 +46,7 @@ import { Component } from '@angular/core';
               <button class="btn-link">Inhabilitar todos</button>
             </div>
             <button class="btn btn-primary">Agregar productos</button>
-            <button class="btn btn-primary btn-save">Guardar</button>
+            <button class="btn btn-primary btn-save" (click)="save()">Guardar (Ctrl+S)</button>
           </div>
         </div>
       </div>
@@ -79,6 +88,14 @@ import { Component } from '@angular/core';
     }
     .active-crumb {
       color: #0284c7;
+      font-weight: 600;
+    }
+    .save-status-badge {
+      font-size: 12px;
+      color: #0284c7;
+      background: #e0f2fe;
+      padding: 4px 10px;
+      border-radius: 6px;
       font-weight: 600;
     }
     .content-body {
@@ -172,4 +189,38 @@ import { Component } from '@angular/core';
     }
   `]
 })
-export class AsociarProductosComponent {}
+export class AsociarProductosComponent implements RefreshableForm {
+  readonly windowId = inject(MDI_WINDOW_ID, { optional: true });
+  private readonly coreCommands = inject(CoreCommandsService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  readonly saveStatus = signal<string | null>(null);
+  readonly saveCount = signal(0);
+
+  constructor() {
+    // Registrar atajo de instancia Control+S
+    injectHotkey('Control+S', () => this.save(), {
+      meta: {
+        name: 'Guardar cambios',
+        description: 'Guardar la asociación de productos en el contrato actual',
+        category: 'Módulo'
+      }
+    });
+
+    if (this.windowId) {
+      const unregister = this.coreCommands.registerRefreshable(this.windowId, this);
+      this.destroyRef.onDestroy(() => unregister());
+    }
+  }
+
+  save(): void {
+    this.saveCount.update(c => c + 1);
+    const winSuffix = this.windowId ? ` [Ventana ${this.windowId.slice(0, 6)}]` : '';
+    this.saveStatus.set(`Guardado #${this.saveCount()}${winSuffix}`);
+  }
+
+  refreshView(): void {
+    this.saveStatus.set(null);
+  }
+}
+

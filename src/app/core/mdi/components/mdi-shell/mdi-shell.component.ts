@@ -8,6 +8,7 @@ import {
   AfterViewInit,
   OnDestroy
 } from '@angular/core';
+import { injectAppHotkeys, injectHotkey } from '@tanstack/angular-hotkeys';
 import { MdiWindowService } from '../../services/mdi-window.service';
 import { MdiWindowComponent, DragPositionPayload } from '../mdi-window/mdi-window.component';
 import { getOrCreateForm } from '../../mdi-registry';
@@ -15,20 +16,28 @@ import { MENU_MODULES } from '../../menu-data';
 import { MenuModule, MenuItem } from '../../models/menu.model';
 import { InicioViewComponent } from '../inicio-view.component';
 import { MenuNodeComponent } from '../menu-node/menu-node.component';
+import { CoreCommandsService } from '../../../commands/core-commands.service';
+import { CommandContextService } from '../../../commands/command-context.service';
+import { ShortcutHelpComponent } from '../../../commands/components/shortcut-help/shortcut-help.component';
 
 @Component({
   selector: 'app-mdi-shell',
   standalone: true,
-  imports: [MdiWindowComponent, InicioViewComponent, MenuNodeComponent],
+  imports: [MdiWindowComponent, InicioViewComponent, MenuNodeComponent, ShortcutHelpComponent],
   templateUrl: './mdi-shell.component.html',
   styleUrl: './mdi-shell.component.css'
 })
 export class MdiShellComponent implements AfterViewInit, OnDestroy {
   readonly mdi = inject(MdiWindowService);
+  readonly coreCommands = inject(CoreCommandsService);
+  readonly cmdContext = inject(CommandContextService);
+  readonly appHotkeys = injectAppHotkeys();
+
   readonly windows = this.mdi.windows;
   readonly dockState = this.mdi.dockState;
   readonly dockPreview = this.mdi.dockPreview;
   readonly workspaceRef = viewChild<ElementRef<HTMLElement>>('workspace');
+  readonly searchInputRef = viewChild<ElementRef<HTMLInputElement>>('searchInput');
 
   readonly allModules: MenuModule[] = MENU_MODULES;
   readonly selectedModuleCode = signal<string>('adm');
@@ -39,6 +48,52 @@ export class MdiShellComponent implements AfterViewInit, OnDestroy {
 
   private resizeObserver?: ResizeObserver;
   private isResizingSplitter = false;
+
+  constructor() {
+    // Registro de comandos globales del Core mediante injectHotkey y appHotkeys
+    injectHotkey(
+      () => this.appHotkeys()['system.search'],
+      () => this.focusGlobalSearch()
+    );
+
+    injectHotkey(
+      () => this.appHotkeys()['system.refresh'],
+      () => this.coreCommands.refreshActiveView()
+    );
+
+    injectHotkey(
+      () => this.appHotkeys()['system.help'],
+      () => this.coreCommands.toggleHelp()
+    );
+
+    injectHotkey(
+      () => this.appHotkeys()['mdi.close'],
+      () => this.coreCommands.closeActiveWindow()
+    );
+
+    // Atajo complementario Control+F4 con preventDefault explícito
+    injectHotkey(
+      'Control+F4',
+      (event) => {
+        event.preventDefault();
+        this.coreCommands.closeActiveWindow();
+      },
+      { preventDefault: 'always' }
+    );
+
+    injectHotkey(
+      () => this.appHotkeys()['mdi.nextWindow'],
+      () => this.coreCommands.activateNextWindow()
+    );
+  }
+
+  focusGlobalSearch(): void {
+    const input = this.searchInputRef()?.nativeElement;
+    if (input) {
+      input.focus();
+      input.select();
+    }
+  }
 
   readonly currentModule = computed<MenuModule>(() => {
     const code = this.selectedModuleCode();
@@ -93,6 +148,7 @@ export class MdiShellComponent implements AfterViewInit, OnDestroy {
 
   selectModule(code: string): void {
     this.selectedModuleCode.set(code);
+    this.cmdContext.setActiveModule(code);
     this.searchQuery.set('');
   }
 

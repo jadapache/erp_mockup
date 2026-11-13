@@ -1,4 +1,8 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject, input, DestroyRef } from '@angular/core';
+import { injectHotkey, provideHotkeys } from '@tanstack/angular-hotkeys';
+import { MDI_WINDOW_ID } from '../../core/mdi/models/mdi-tokens';
+import { CoreCommandsService } from '../../core/commands/core-commands.service';
+import { RefreshableForm } from '../../core/commands/models/app-command.model';
 
 interface NumeracionRecord {
   id: string;
@@ -12,8 +16,153 @@ interface NumeracionRecord {
 }
 
 @Component({
+  selector: 'app-numeracion-modal',
+  standalone: true,
+  providers: [
+    provideHotkeys({
+      scope: 'dialog-nueva-numeracion',
+      exclusive: true
+    })
+  ],
+  template: `
+    <div class="modal-backdrop" (click)="cancel()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h4 class="modal-title">Nueva Numeración</h4>
+          <button type="button" class="btn-close-sm" (click)="cancel()">✕</button>
+        </div>
+        <div class="modal-body">
+          <label class="field-label required">Módulo</label>
+          <input type="text" class="field-input" placeholder="Nombre del módulo..." [value]="modulo()" (input)="modulo.set($any($event.target).value)" />
+          
+          <label class="field-label required" style="margin-top: 10px;">Prefijo</label>
+          <input type="text" class="field-input" placeholder="Prefijo..." [value]="prefijo()" (input)="prefijo.set($any($event.target).value)" />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="cancel()">Cancelar (Escape)</button>
+          <button type="button" class="btn-confirm" (click)="confirm()">Guardar (Enter)</button>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [`
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.4);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: #ffffff;
+      border-radius: 10px;
+      width: 400px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8fafc;
+    }
+    .modal-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .btn-close-sm {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #64748b;
+    }
+    .modal-body {
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .field-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+    }
+    .field-input {
+      width: 100%;
+      height: 36px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 0 10px;
+      font-size: 13px;
+      box-sizing: border-box;
+    }
+    .modal-footer {
+      padding: 12px 18px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: #f8fafc;
+    }
+    .btn-cancel {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+    }
+    .btn-confirm {
+      background: #0284c7;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  `]
+})
+export class NumeracionModalComponent {
+  readonly modulo = signal('Facturación');
+  readonly prefijo = signal('FE');
+
+  save = input<((val: { modulo: string; prefijo: string }) => void) | null>(null);
+  close = input<(() => void) | null>(null);
+
+  constructor() {
+    injectHotkey('Escape', () => this.cancel());
+    injectHotkey('Enter', () => this.confirm());
+  }
+
+  cancel(): void {
+    if (this.close()) {
+      this.close()!();
+    }
+  }
+
+  confirm(): void {
+    if (this.save()) {
+      this.save()!({ modulo: this.modulo(), prefijo: this.prefijo() });
+    }
+    this.cancel();
+  }
+}
+
+@Component({
   selector: 'app-numeracion',
   standalone: true,
+  imports: [NumeracionModalComponent],
   template: `
     <div class="page-container">
       <div class="page-header">
@@ -23,8 +172,9 @@ interface NumeracionRecord {
             <span>Administrador de Aplicación</span> / <span class="active-crumb">Numeración</span>
           </div>
         </div>
-        <button type="button" class="btn-action-primary">+ Nueva Numeración</button>
+        <button type="button" class="btn-action-primary" (click)="abrirModalNueva()">+ Nueva Numeración (Alt+N)</button>
       </div>
+
 
       <div class="content-body">
         <div class="content-card">
@@ -101,6 +251,10 @@ interface NumeracionRecord {
         </div>
       </div>
     </div>
+
+    @if (modalVisible()) {
+      <app-numeracion-modal [close]="cerrarModal.bind(this)" />
+    }
   `,
   styles: [`
     .page-container {
@@ -284,9 +438,14 @@ interface NumeracionRecord {
     }
   `]
 })
-export class NumeracionComponent {
+export class NumeracionComponent implements RefreshableForm {
+  readonly windowId = inject(MDI_WINDOW_ID, { optional: true });
+  private readonly coreCommands = inject(CoreCommandsService);
+  private readonly destroyRef = inject(DestroyRef);
+
   readonly searchTerm = signal('');
   readonly selectedModule = signal('');
+  readonly modalVisible = signal(false);
 
   readonly items = signal<NumeracionRecord[]>([
     {
@@ -327,6 +486,34 @@ export class NumeracionComponent {
       return matchSearch && matchMod;
     });
   });
+
+  constructor() {
+    injectHotkey('Alt+N', () => this.abrirModalNueva(), {
+      meta: {
+        name: 'Nueva numeración',
+        description: 'Abrir diálogo para registrar una nueva numeración',
+        category: 'Módulo'
+      }
+    });
+
+    if (this.windowId) {
+      const unregister = this.coreCommands.registerRefreshable(this.windowId, this);
+      this.destroyRef.onDestroy(() => unregister());
+    }
+  }
+
+  abrirModalNueva(): void {
+    this.modalVisible.set(true);
+  }
+
+  cerrarModal(): void {
+    this.modalVisible.set(false);
+  }
+
+  refreshView(): void {
+    this.searchTerm.set('');
+    this.selectedModule.set('');
+  }
 
   onSearchInput(event: Event): void {
     const target = event.target as HTMLInputElement;

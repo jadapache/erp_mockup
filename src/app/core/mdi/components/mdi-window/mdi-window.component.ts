@@ -28,6 +28,8 @@ export class MdiWindowComponent {
   workspaceHeight = input<number>(800);
 
   activate = output<string>();
+
+
   close = output<string>();
   minimize = output<string>();
   maximize = output<string>();
