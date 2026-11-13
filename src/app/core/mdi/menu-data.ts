@@ -6197,6 +6197,7 @@ export const MENU_MODULES: MenuModule[] = [
             "name": "División Política Internacional",
             "orden": "",
             "url": "",
+            "icon": "globe",
             "children": []
           },
           {

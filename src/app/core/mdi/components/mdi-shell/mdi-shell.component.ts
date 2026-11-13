@@ -30,6 +30,7 @@ export interface SearchResultItem {
   name: string;
   moduleCode: string;
   moduleName: string;
+  icon?: string;
 }
 
 @Component({
@@ -270,7 +271,8 @@ export class MdiShellComponent implements OnInit, AfterViewInit, OnDestroy {
           id: item.id,
           name: item.name,
           moduleCode,
-          moduleName
+          moduleName,
+          icon: item.icon
         });
       }
       if (item.children && item.children.length > 0) {

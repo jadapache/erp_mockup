@@ -59,9 +59,17 @@ import { MenuItem } from '../../models/menu.model';
         (click)="itemSelect.emit(item())"
         [title]="item().name"
       >
-        <svg class="node-icon grid-icon" viewBox="0 0 20 20" width="14" height="14" fill="currentColor">
-          <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-        </svg>
+        @if (item().icon === 'globe') {
+          <svg class="node-icon globe-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+        } @else {
+          <svg class="node-icon grid-icon" viewBox="0 0 20 20" width="14" height="14" fill="currentColor">
+            <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+          </svg>
+        }
         <span class="leaf-label">{{ item().name }}</span>
       </button>
     }
@@ -164,7 +172,7 @@ import { MenuItem } from '../../models/menu.model';
 
     .leaf-item-btn {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       gap: 10px;
       width: 100%;
       border: none;
