@@ -169,7 +169,7 @@ export class MdiShellComponent implements AfterViewInit, OnDestroy {
     const maxH = el ? Math.max(260, el.clientHeight - 40) : (win ? win.innerHeight - 140 : 800);
     const targetW = Math.min(formDef.width, maxW);
     const targetH = Math.min(formDef.height, maxH);
-    this.mdi.open(formDef.title, formDef.component, targetW, targetH);
+    this.mdi.open(formDef.title, formDef.component, targetW, targetH, formDef.id);
   }
 
   cascadeWindows(): void {

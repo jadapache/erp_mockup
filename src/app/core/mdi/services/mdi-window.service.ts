@@ -1,6 +1,7 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, effect } from '@angular/core';
 import { Type } from '@angular/core';
-import { DockOrientation, DockPosition, MdiDockState, MdiWindow } from '../models/mdi-window.model';
+import { DockPosition, MdiDockState, MdiWindow } from '../models/mdi-window.model';
+import { getOrCreateForm } from '../mdi-registry';
 import {
   WorkspaceRect,
   detectDockCandidate,
@@ -10,14 +11,41 @@ import {
   calculateDockGeometries,
   getPreviewRect,
   clampWindowPosition,
-  MIN_WINDOW_WIDTH,
-  MIN_WINDOW_HEIGHT
 } from './mdi-dock-utils';
 
 export interface DockPreviewInfo {
   activeRect: { x: number; y: number; width: number; height: number };
   availableRect?: { x: number; y: number; width: number; height: number };
 }
+
+interface StoredWindowItem {
+  id: string;
+  title: string;
+  formId?: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  zIndex: number;
+  minimized: boolean;
+  maximized: boolean;
+  active: boolean;
+  dockedPosition?: DockPosition;
+  restoreGeometry?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+}
+
+interface StoredMdiSession {
+  windows: StoredWindowItem[];
+  dockState: MdiDockState | null;
+  nextZIndex: number;
+}
+
+const STORAGE_KEY = 'erp_mdi_session';
 
 @Injectable({ providedIn: 'root' })
 export class MdiWindowService {
@@ -38,6 +66,14 @@ export class MdiWindowService {
 
   private nextZIndex = 100;
   private readonly DOCK_BASE_Z_INDEX = 10;
+  private isRestoring = false;
+
+  constructor() {
+    this.restoreFromSession();
+    effect(() => {
+      this.syncToSession(this.windowsState(), this.dockStateSignal());
+    });
+  }
 
   setWorkspaceRect(rect: WorkspaceRect): void {
     if (rect.width <= 0 || rect.height <= 0) return;
@@ -45,7 +81,7 @@ export class MdiWindowService {
     this.recalculateDockGeometries();
   }
 
-  open(title: string, component: Type<unknown>, width = 760, height = 480): string {
+  open(title: string, component: Type<unknown>, width = 760, height = 480, formId?: string): string {
     const existing = this.windowsState().find(w => w.title === title);
     if (existing) {
       if (existing.minimized) {
@@ -62,6 +98,7 @@ export class MdiWindowService {
       id,
       title,
       component,
+      formId,
       x: 30 + (count % 8) * 28,
       y: 30 + (count % 8) * 28,
       width,
@@ -512,6 +549,85 @@ export class MdiWindowService {
 
     if (remaining.length > 0) {
       this.activate(remaining[0].id);
+    }
+  }
+
+  private syncToSession(windows: MdiWindow[], dockState: MdiDockState | null): void {
+    if (this.isRestoring || typeof window === 'undefined' || !window.sessionStorage) return;
+
+    try {
+      const serializableWindows: StoredWindowItem[] = windows.map(w => ({
+        id: w.id,
+        title: w.title,
+        formId: w.formId,
+        x: w.x,
+        y: w.y,
+        width: w.width,
+        height: w.height,
+        zIndex: w.zIndex,
+        minimized: w.minimized,
+        maximized: w.maximized,
+        active: w.active,
+        dockedPosition: w.dockedPosition,
+        restoreGeometry: w.restoreGeometry
+      }));
+
+      const payload: StoredMdiSession = {
+        windows: serializableWindows,
+        dockState,
+        nextZIndex: this.nextZIndex
+      };
+
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch {
+      // Ignorar fallos de cuota o serialización en sessionStorage
+    }
+  }
+
+  private restoreFromSession(): void {
+    if (typeof window === 'undefined' || !window.sessionStorage) return;
+
+    try {
+      const raw = sessionStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+
+      const data = JSON.parse(raw) as StoredMdiSession;
+      if (!data || !Array.isArray(data.windows)) return;
+
+      this.isRestoring = true;
+      const restoredWindows: MdiWindow[] = [];
+
+      for (const item of data.windows) {
+        const formDef = getOrCreateForm(item.formId || item.title, item.title);
+        restoredWindows.push({
+          id: item.id,
+          title: item.title,
+          formId: item.formId,
+          component: formDef.component,
+          x: item.x,
+          y: item.y,
+          width: item.width,
+          height: item.height,
+          zIndex: item.zIndex,
+          minimized: item.minimized,
+          maximized: item.maximized,
+          active: item.active,
+          dockedPosition: item.dockedPosition,
+          restoreGeometry: item.restoreGeometry
+        });
+      }
+
+      this.windowsState.set(restoredWindows);
+      if (data.dockState) {
+        this.dockStateSignal.set(data.dockState);
+      }
+      if (typeof data.nextZIndex === 'number') {
+        this.nextZIndex = data.nextZIndex;
+      }
+    } catch {
+      // Ignorar errores al parsear
+    } finally {
+      this.isRestoring = false;
     }
   }
 }

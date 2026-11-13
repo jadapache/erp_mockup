@@ -190,14 +190,14 @@ export const MDI_FORMS: Record<string, FormDefinition> = {
   }
 };
 
-export function getOrCreateForm(id: string, title: string, moduleName: string): FormDefinition {
+export function getOrCreateForm(id: string, title?: string, moduleName?: string): FormDefinition {
   if (MDI_FORMS[id]) {
     return MDI_FORMS[id];
   }
 
   return {
     id,
-    title,
+    title: title || id,
     component: GenericModuleViewComponent,
     width: 780,
     height: 490

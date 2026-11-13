@@ -15,6 +15,7 @@ export interface MdiWindow {
   id: string;
   title: string;
   component: Type<unknown>;
+  formId?: string;
 
   x: number;
   y: number;

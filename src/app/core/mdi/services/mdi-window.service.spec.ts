@@ -186,4 +186,54 @@ describe('MdiWindowService Snap Docking (Horizontal Side-by-Side Only)', () => {
       expect(service.windows().every(w => !w.dockedPosition)).toBe(true);
     });
   });
+
+  describe('SessionStorage Persistence', () => {
+    afterEach(() => {
+      sessionStorage.clear();
+    });
+
+    it('should persist open windows to sessionStorage', () => {
+      service.open('Test Window', DummyComponent, 500, 300, 'asociarProductos');
+      TestBed.flushEffects();
+      const raw = sessionStorage.getItem('erp_mdi_session');
+      expect(raw).toBeTruthy();
+      const parsed = JSON.parse(raw!);
+      expect(parsed.windows.length).toBe(1);
+      expect(parsed.windows[0].title).toBe('Test Window');
+      expect(parsed.windows[0].formId).toBe('asociarProductos');
+    });
+
+    it('should rehydrate windows from sessionStorage on initialization', () => {
+      const sessionData = {
+        windows: [
+          {
+            id: 'saved-1',
+            title: 'Asociar Productos a Contratos',
+            formId: 'asociarProductos',
+            x: 50,
+            y: 60,
+            width: 800,
+            height: 500,
+            zIndex: 105,
+            minimized: false,
+            maximized: false,
+            active: true
+          }
+        ],
+        dockState: null,
+        nextZIndex: 110
+      };
+      sessionStorage.setItem('erp_mdi_session', JSON.stringify(sessionData));
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({});
+      const newService = TestBed.inject(MdiWindowService);
+
+      expect(newService.windows().length).toBe(1);
+      expect(newService.windows()[0].id).toBe('saved-1');
+      expect(newService.windows()[0].title).toBe('Asociar Productos a Contratos');
+      expect(newService.windows()[0].component).toBeTruthy();
+      expect(newService.activeWindow()?.id).toBe('saved-1');
+    });
+  });
 });
