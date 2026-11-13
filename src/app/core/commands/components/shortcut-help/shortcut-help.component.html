@@ -1,0 +1,48 @@
+<div class="shortcut-help-backdrop" (click)="close()">
+  <div class="shortcut-help-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="header-info">
+        <h3 class="modal-title">Atajos de Teclado y Comandos</h3>
+        <p class="modal-subtitle">Comandos transversales y atajos contextuales activos</p>
+      </div>
+      <button type="button" class="btn-close" (click)="close()" title="Cerrar (Escape)">
+        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M2 2l12 12M14 2L2 14" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      @for (group of groups(); track group.name) {
+        @if (group.items.length > 0) {
+          <div class="help-section">
+            <h4 class="section-title">{{ group.name }}</h4>
+            <div class="command-list">
+              @for (item of group.items; track item.id) {
+                <div class="command-item">
+                  <div class="command-meta">
+                    <span class="command-name">{{ item.name }}</span>
+                    @if (item.description) {
+                      <span class="command-desc">{{ item.description }}</span>
+                    }
+                  </div>
+                  <div class="command-shortcut-wrap">
+                    @if (item.shortcut && item.shortcut !== 'Sin atajo asignado') {
+                      <kbd class="kbd-badge">{{ item.shortcut }}</kbd>
+                    } @else {
+                      <span class="unassigned-text">Sin atajo</span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+    <div class="modal-footer">
+      <span class="footer-hint">Presione <kbd class="kbd-badge-sm">F1</kbd> o <kbd class="kbd-badge-sm">Esc</kbd> para salir</span>
+    </div>
+  </div>
+</div>
