@@ -1,7 +1,7 @@
 import { Type } from '@angular/core';
-import { InicioViewComponent } from '../mdi/components/inicio-view.component';
-import { AsociarProductosComponent } from '../../modules/con_module/asociar-productos.component';
-import { CondicionesTarifaComponent } from '../../modules/con_module/condiciones-tarifa.component';
+import { InicioViewComponent } from './components/inicio-view.component';
+import { AsociarProductosComponent } from '../../modules/con-mod/asociar-productos.component';
+import { CondicionesTarifaComponent } from '../../modules/con-mod/condiciones-tarifa.component';
 import {
   ContratanteComponent,
   EntidadesComponent,
@@ -9,14 +9,14 @@ import {
   TarifasComponent,
   DestinosPaquetesComponent,
   ProximoVencerComponent
-} from '../../modules/con_module/contratos-pages.component';
-import { GenericModuleViewComponent } from '../../modules/common/generic-module-view.component';
-import { DivisionPoliticaComponent } from '../../modules/apl_module/division-politica.component';
-import { NumeracionComponent } from '../../modules/apl_module/numeracion.component';
-import { DocumentosValoresPagoComponent } from '../../modules/apl_module/documentos-valores-pago.component';
-import { CitasComponent } from '../../modules/adm_module/citas.component';
-import { AlertasAdmisionesComponent } from '../../modules/adm_module/alertas-admisiones.component';
-import { AtencionPacienteComponent } from '../../modules/adm_module/atencion-paciente.component';
+} from '../../modules/con-mod/contratos-pages.component';
+import { GenericModuleViewComponent } from '../../shared/components/generic-module-view.component';
+import { DivisionPoliticaComponent } from '../../modules/apl-mod/division-politica.component';
+import { NumeracionComponent } from '../../modules/apl-mod/numeracion.component';
+import { DocumentosValoresPagoComponent } from '../../modules/apl-mod/documentos-valores-pago.component';
+import { CitasComponent } from '../../modules/adm-mod/citas.component';
+import { AlertasAdmisionesComponent } from '../../modules/adm-mod/alertas-admisiones.component';
+import { AtencionPacienteComponent } from '../../modules/adm-mod/atencion-paciente.component';
 
 export interface FormDefinition {
   id: string;

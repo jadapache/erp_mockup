@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { GenericModuleViewComponent } from '../common/generic-module-view.component';
+import { GenericModuleViewComponent } from '../../shared/components/generic-module-view.component';
 
 @Component({
   selector: 'app-contratante-view',
