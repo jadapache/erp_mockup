@@ -64,18 +64,24 @@ export class ShortcutHelpComponent {
 
     // Comandos contextuales por módulo y ventanas actualmente activas
     const moduleItems: HelpGroup['items'] = [];
-    const internalKeys = new Set(['Escape', 'Ctrl+F4']);
+    const internalKeys = new Set(['Escape', 'Control+F4']);
 
     for (const reg of this.registrations()) {
       const options = reg.options;
       const hotkeyStr = typeof reg.hotkey === 'string' ? reg.hotkey : '';
+      const formattedKey = reg.hotkey ? this.formatForDisplay(reg.hotkey) : '';
       
-      if (('appHotkeyId' in options && options.appHotkeyId) || internalKeys.has(hotkeyStr)) {
+      if (
+        ('appHotkeyId' in options && options.appHotkeyId) ||
+        internalKeys.has(hotkeyStr) ||
+        internalKeys.has(formattedKey) ||
+        hotkeyStr.toLowerCase().includes('f4') ||
+        formattedKey.toLowerCase().includes('f4')
+      ) {
         continue;
       }
 
       const meta = options.meta;
-      const formattedKey = reg.hotkey ? this.formatForDisplay(reg.hotkey) : '';
       const name = meta?.name ?? (hotkeyStr || 'Atajo de ventana');
       
       moduleItems.push({
