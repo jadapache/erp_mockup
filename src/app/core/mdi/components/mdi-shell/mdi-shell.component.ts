@@ -25,6 +25,13 @@ import { CommandContextService } from '../../../commands/command-context.service
 import { ShortcutHelpComponent } from '../../../commands/components/shortcut-help/shortcut-help.component';
 import { getSlugForForm, resolveFormBySlugs } from '../../services/mdi-slug-router';
 
+export interface SearchResultItem {
+  id: string;
+  name: string;
+  moduleCode: string;
+  moduleName: string;
+}
+
 @Component({
   selector: 'app-mdi-shell',
   standalone: true,
@@ -50,6 +57,7 @@ export class MdiShellComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly selectedModuleCode = signal<string>('adm');
   readonly sidebarCollapsed = signal<boolean>(false);
   readonly searchQuery = signal<string>('');
+  readonly isSearchOpen = signal<boolean>(false);
   readonly workspaceWidth = signal<number>(1200);
   readonly workspaceHeight = signal<number>(800);
 
@@ -151,6 +159,12 @@ export class MdiShellComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.filterTree(items, q);
   });
 
+  readonly searchResults = computed<SearchResultItem[]>(() => {
+    const q = this.searchQuery().trim().toLowerCase();
+    if (!q) return [];
+    return this.findMatchingMenuItems(q);
+  });
+
   readonly splitterStyle = computed(() => {
     const dock = this.dockState();
     if (!dock || !dock.secondWindowId) return null;
@@ -199,6 +213,70 @@ export class MdiShellComponent implements OnInit, AfterViewInit, OnDestroy {
   onSearch(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.searchQuery.set(input.value);
+    this.isSearchOpen.set(Boolean(input.value.trim()));
+  }
+
+  onSearchFocus(): void {
+    if (this.searchQuery().trim()) {
+      this.isSearchOpen.set(true);
+    }
+  }
+
+  clearSearch(): void {
+    this.searchQuery.set('');
+    this.isSearchOpen.set(false);
+    const input = this.searchInputRef()?.nativeElement;
+    if (input) {
+      input.value = '';
+      input.focus();
+    }
+  }
+
+  closeSearchDropdown(): void {
+    this.isSearchOpen.set(false);
+  }
+
+  selectSearchResult(item: SearchResultItem): void {
+    this.selectedModuleCode.set(item.moduleCode);
+    this.cmdContext.setActiveModule(item.moduleCode);
+    this.clearSearch();
+    this.openFormById(item.id, item.name);
+  }
+
+  private findMatchingMenuItems(query: string): SearchResultItem[] {
+    const results: SearchResultItem[] = [];
+    const limit = 20;
+
+    for (const mod of this.allModules) {
+      this.collectModuleMatches(mod.items, mod.code, mod.name, query, results, limit);
+      if (results.length >= limit) break;
+    }
+    return results;
+  }
+
+  private collectModuleMatches(
+    items: MenuItem[],
+    moduleCode: string,
+    moduleName: string,
+    query: string,
+    results: SearchResultItem[],
+    limit: number
+  ): void {
+    for (const item of items) {
+      if (results.length >= limit) return;
+      const isLeaf = !item.children || item.children.length === 0;
+      if (isLeaf && item.name.toLowerCase().includes(query)) {
+        results.push({
+          id: item.id,
+          name: item.name,
+          moduleCode,
+          moduleName
+        });
+      }
+      if (item.children && item.children.length > 0) {
+        this.collectModuleMatches(item.children, moduleCode, moduleName, query, results, limit);
+      }
+    }
   }
 
   openMenuItem(item: MenuItem): void {
