@@ -16,6 +16,13 @@ export const routes: Routes = [
       )
   },
   {
+    path: ':moduleSlug/:formSlug',
+    loadComponent: () =>
+      import('./core/mdi/components/mdi-shell/mdi-shell.component').then(
+        m => m.MdiShellComponent
+      )
+  },
+  {
     path: '**',
     redirectTo: ''
   }

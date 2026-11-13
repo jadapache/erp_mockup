@@ -64,7 +64,7 @@ export class ShortcutHelpComponent {
 
     // Comandos contextuales por módulo y ventanas actualmente activas
     const moduleItems: HelpGroup['items'] = [];
-    const internalKeys = new Set(['Escape', 'Control+F4']);
+    const internalKeys = new Set(['Escape']);
 
     for (const reg of this.registrations()) {
       const options = reg.options;
@@ -74,9 +74,7 @@ export class ShortcutHelpComponent {
       if (
         ('appHotkeyId' in options && options.appHotkeyId) ||
         internalKeys.has(hotkeyStr) ||
-        internalKeys.has(formattedKey) ||
-        hotkeyStr.toLowerCase().includes('f4') ||
-        formattedKey.toLowerCase().includes('f4')
+        internalKeys.has(formattedKey)
       ) {
         continue;
       }

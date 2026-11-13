@@ -5,9 +5,13 @@ import {
   inject,
   signal,
   viewChild,
+  effect,
+  OnInit,
   AfterViewInit,
   OnDestroy
 } from '@angular/core';
+import { Location } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { injectAppHotkeys, injectHotkey } from '@tanstack/angular-hotkeys';
 import { MdiWindowService } from '../../services/mdi-window.service';
 import { MdiWindowComponent, DragPositionPayload } from '../mdi-window/mdi-window.component';
@@ -19,6 +23,7 @@ import { MenuNodeComponent } from '../menu-node/menu-node.component';
 import { CoreCommandsService } from '../../../commands/core-commands.service';
 import { CommandContextService } from '../../../commands/command-context.service';
 import { ShortcutHelpComponent } from '../../../commands/components/shortcut-help/shortcut-help.component';
+import { getSlugForForm, resolveFormBySlugs } from '../../services/mdi-slug-router';
 
 @Component({
   selector: 'app-mdi-shell',
@@ -27,11 +32,13 @@ import { ShortcutHelpComponent } from '../../../commands/components/shortcut-hel
   templateUrl: './mdi-shell.component.html',
   styleUrl: './mdi-shell.component.css'
 })
-export class MdiShellComponent implements AfterViewInit, OnDestroy {
+export class MdiShellComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly mdi = inject(MdiWindowService);
   readonly coreCommands = inject(CoreCommandsService);
   readonly cmdContext = inject(CommandContextService);
   readonly appHotkeys = injectAppHotkeys();
+  private readonly location = inject(Location);
+  private readonly route = inject(ActivatedRoute);
 
   readonly windows = this.mdi.windows;
   readonly dockState = this.mdi.dockState;
@@ -50,7 +57,54 @@ export class MdiShellComponent implements AfterViewInit, OnDestroy {
   private isResizingSplitter = false;
 
   constructor() {
-    // Registro de comandos globales del Core mediante injectHotkey y appHotkeys
+    this.setupUrlSync();
+    this.registerHotkeys();
+  }
+
+  ngOnInit(): void {
+    this.handleRouteDeepLink();
+  }
+
+  private handleRouteDeepLink(): void {
+    const params = this.route.snapshot.params;
+    const modSlug = params['moduleSlug'];
+    const formSlug = params['formSlug'];
+
+    if (!modSlug || !formSlug) return;
+
+    const match = resolveFormBySlugs(modSlug, formSlug);
+    if (!match) return;
+
+    this.selectedModuleCode.set(match.moduleCode);
+    this.cmdContext.setActiveModule(match.moduleCode);
+
+    const existing = this.mdi.windows().find(w => w.formId === match.formDef.id || w.title === match.formDef.title);
+    if (existing) {
+      if (existing.minimized) this.mdi.restore(existing.id);
+      else this.mdi.activate(existing.id);
+    } else {
+      this.mdi.open(match.formDef.title, match.formDef.component, match.formDef.width, match.formDef.height, match.formDef.id);
+    }
+  }
+
+  private setupUrlSync(): void {
+    effect(() => {
+      const active = this.mdi.activeWindow();
+      if (!active) {
+        if (this.mdi.windows().length === 0) {
+          this.location.replaceState('');
+        }
+        return;
+      }
+
+      const slugs = getSlugForForm(active.formId || '', active.title);
+      if (slugs) {
+        this.location.replaceState(`${slugs.moduleSlug}/${slugs.formSlug}`);
+      }
+    });
+  }
+
+  private registerHotkeys(): void {
     injectHotkey(
       () => this.appHotkeys()['system.search'],
       () => this.focusGlobalSearch()
@@ -69,16 +123,6 @@ export class MdiShellComponent implements AfterViewInit, OnDestroy {
     injectHotkey(
       () => this.appHotkeys()['mdi.close'],
       () => this.coreCommands.closeActiveWindow()
-    );
-
-    // Atajo complementario Control+F4 con preventDefault explícito
-    injectHotkey(
-      'Control+F4',
-      (event) => {
-        event.preventDefault();
-        this.coreCommands.closeActiveWindow();
-      },
-      { preventDefault: 'always' }
     );
 
     injectHotkey(
