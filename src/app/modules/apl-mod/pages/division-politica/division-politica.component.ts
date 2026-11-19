@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, OnDestroy } from '@angular/core';
+import { Component, signal, computed, inject, OnDestroy, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
@@ -9,6 +9,11 @@ import {
   ValidationErrors,
   ValidatorFn
 } from '@angular/forms';
+import { injectHotkey } from '@tanstack/angular-hotkeys';
+import { MDI_WINDOW_ID } from '../../../../core/mdi/models/mdi-tokens';
+import { CoreCommandsService } from '../../../../core/commands/core-commands.service';
+import { CommandContextService } from '../../../../core/commands/command-context.service';
+import { RefreshableForm } from '../../../../core/commands/models/app-command.model';
 import { DivisionPoliticaService } from '../../services/division-politica.service';
 import { DivisionPoliticaItem, NivelDivision } from '../../models/division-politica.model';
 
@@ -21,9 +26,13 @@ type ViewMode = 'empty' | 'view' | 'edit' | 'create';
   templateUrl: './division-politica.component.html',
   styleUrls: ['./division-politica.component.css']
 })
-export class DivisionPoliticaComponent implements OnDestroy {
+export class DivisionPoliticaComponent implements OnDestroy, RefreshableForm {
+  readonly windowId = inject(MDI_WINDOW_ID, { optional: true });
   private readonly fb = inject(FormBuilder);
   private readonly geoService = inject(DivisionPoliticaService);
+  private readonly coreCommands = inject(CoreCommandsService);
+  private readonly cmdContext = inject(CommandContextService);
+  private readonly destroyRef = inject(DestroyRef);
   private alertTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   readonly searchTerm = signal('');
@@ -45,6 +54,110 @@ export class DivisionPoliticaComponent implements OnDestroy {
     tipoImpuesto: [''],
     codigoDestino: ['']
   });
+
+  constructor() {
+    this.registerHotkeys();
+    if (this.windowId) {
+      const unregister = this.coreCommands.registerRefreshable(this.windowId, this);
+      this.destroyRef.onDestroy(() => unregister());
+    }
+  }
+
+  private registerHotkeys(): void {
+    const isThisWindowActive = () =>
+      !this.windowId || this.cmdContext.activeWindowId() === this.windowId;
+
+    injectHotkey(
+      'Alt+N',
+      () => this.onDynamicCreate(),
+      () => ({
+        enabled: isThisWindowActive(),
+        meta: {
+          name: this.getCreateCommandLabel(),
+          description: 'Crear nuevo registro geográfico según la selección',
+          category: 'Módulo' as const
+        }
+      })
+    );
+
+    injectHotkey(
+      'Control+E',
+      () => this.onDynamicDelete(),
+      () => ({
+        enabled: isThisWindowActive() && this.canDeleteSelected(),
+        meta: {
+          name: this.getDeleteCommandLabel(),
+          description: 'Eliminar el registro geográfico seleccionado',
+          category: 'Módulo' as const
+        }
+      })
+    );
+
+    injectHotkey(
+      'Control+G',
+      (event) => {
+        event.preventDefault();
+        this.onDynamicSave();
+      },
+      () => ({
+        enabled: isThisWindowActive() && (this.viewMode() === 'create' || this.viewMode() === 'edit'),
+        meta: {
+          name: 'Guardar registro',
+          description: 'Guardar cambios del registro geográfico en edición',
+          category: 'Módulo' as const
+        }
+      })
+    );
+  }
+
+  refreshView(): void {
+    this.searchTerm.set('');
+    this.viewMode.set('empty');
+    this.selectedNode.set(null);
+  }
+
+  getCreateCommandLabel(): string {
+    const node = this.selectedNode();
+    if (!node) return 'Nuevo País';
+    if (node.nivel === 'PAIS') return 'Nuevo Departamento';
+    if (node.nivel === 'DEPARTAMENTO') return 'Nueva Ciudad';
+    if (node.nivel === 'CIUDAD') return 'Nuevo Barrio';
+    return 'Nuevo';
+  }
+
+  getDeleteCommandLabel(): string {
+    const node = this.selectedNode();
+    if (!node) return 'Eliminar registro';
+    if (node.nivel === 'PAIS') return 'Eliminar País';
+    if (node.nivel === 'DEPARTAMENTO') return 'Eliminar Departamento';
+    if (node.nivel === 'CIUDAD') return 'Eliminar Ciudad';
+    return 'Eliminar Barrio';
+  }
+
+  canDeleteSelected(): boolean {
+    return this.selectedNode() !== null;
+  }
+
+  onDynamicCreate(): void {
+    const node = this.selectedNode();
+    if (!node || node.nivel === 'BARRIO') {
+      this.onCreateNewRoot();
+    } else {
+      this.onAddChild();
+    }
+  }
+
+  onDynamicDelete(): void {
+    if (this.canDeleteSelected()) {
+      this.openDeleteConfirm();
+    }
+  }
+
+  onDynamicSave(): void {
+    if (this.viewMode() === 'create' || this.viewMode() === 'edit') {
+      this.onSubmitForm();
+    }
+  }
 
   readonly filteredNodes = computed(() => {
     const q = this.searchTerm().trim().toLowerCase();

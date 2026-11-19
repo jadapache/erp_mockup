@@ -30,14 +30,22 @@ export class MdiWindowComponent {
   workspaceWidth = input<number>(1200);
   workspaceHeight = input<number>(800);
 
-  readonly windowInjector = computed(() => {
-    return Injector.create({
-      providers: [
-        { provide: MDI_WINDOW_ID, useValue: this.window().id }
-      ],
-      parent: this.parentInjector
-    });
-  });
+  private cachedInjector?: Injector;
+  private cachedWindowId?: string;
+
+  get windowInjector(): Injector {
+    const currentId = this.window().id;
+    if (!this.cachedInjector || this.cachedWindowId !== currentId) {
+      this.cachedWindowId = currentId;
+      this.cachedInjector = Injector.create({
+        providers: [
+          { provide: MDI_WINDOW_ID, useValue: currentId }
+        ],
+        parent: this.parentInjector
+      });
+    }
+    return this.cachedInjector;
+  }
 
   activate = output<string>();
 
