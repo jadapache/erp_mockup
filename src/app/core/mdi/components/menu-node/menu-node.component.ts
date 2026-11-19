@@ -71,6 +71,9 @@ import { MenuItem } from '../../models/menu.model';
           </svg>
         }
         <span class="leaf-label">{{ item().name }}</span>
+        @if (item().shortcut) {
+          <span class="leaf-shortcut">{{ item().shortcut }}</span>
+        }
       </button>
     }
   `,
@@ -199,9 +202,22 @@ import { MenuItem } from '../../models/menu.model';
     }
 
     .leaf-label {
+      flex: 1;
       font-size: 13px;
       line-height: 1.35;
       word-break: break-word;
+    }
+
+    .leaf-shortcut {
+      flex-shrink: 0;
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      background: #f1f5f9;
+      padding: 1px 6px;
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
     }
   `]
 })

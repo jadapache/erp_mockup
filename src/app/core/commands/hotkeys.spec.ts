@@ -347,4 +347,31 @@ describe('Hotkeys Integration & Scopes Tests', () => {
       document.body.removeChild(input);
     });
   });
+
+  describe('5. UiCommand and Contextual ShortCut Catalog Order', () => {
+    it('should register and retrieve commands matching specific surfaces and context', () => {
+      const core = TestBed.inject(CoreCommandsService);
+      const ctxService = TestBed.inject(CommandContextService);
+
+      const unregister = core.registerCommand({
+        id: 'cmd.atencion.insert',
+        label: 'Insertar registro',
+        shortcut: 'Ctrl+I',
+        scope: 'window',
+        windowId: 'win-atencion-1',
+        surfaces: ['toolbar', 'context-menu', 'shortcut-catalog'],
+        execute: () => {}
+      });
+
+      ctxService.setActiveWindow('win-atencion-1');
+      const toolbarCommands = core.getCommandsForSurface('toolbar');
+      expect(toolbarCommands.some(c => c.id === 'cmd.atencion.insert')).toBe(true);
+
+      ctxService.setActiveWindow('win-other');
+      const otherWindowCommands = core.getCommandsForSurface('toolbar');
+      expect(otherWindowCommands.some(c => c.id === 'cmd.atencion.insert')).toBe(false);
+
+      unregister();
+    });
+  });
 });

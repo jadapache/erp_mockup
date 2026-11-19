@@ -1787,6 +1787,7 @@ export const MENU_MODULES: MenuModule[] = [
             "name": "Atención",
             "orden": "",
             "url": "",
+            "shortcut": "Ctrl+E",
             "children": []
           },
           {
@@ -1822,6 +1823,7 @@ export const MENU_MODULES: MenuModule[] = [
             "name": "Citas",
             "orden": "",
             "url": "",
+            "shortcut": "Ctrl+I",
             "children": []
           },
           {

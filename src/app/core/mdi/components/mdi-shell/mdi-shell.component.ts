@@ -23,7 +23,7 @@ import { MenuNodeComponent } from '../menu-node/menu-node.component';
 import { CoreCommandsService } from '../../../commands/core-commands.service';
 import { CommandContextService } from '../../../commands/command-context.service';
 import { ShortcutHelpComponent } from '../../../commands/components/shortcut-help/shortcut-help.component';
-import { getSlugForForm, resolveFormBySlugs } from '../../services/mdi-slug-router';
+import { getSlugForForm, getModuleCodeForForm, resolveFormBySlugs } from '../../services/mdi-slug-router';
 
 export interface SearchResultItem {
   id: string;
@@ -99,11 +99,19 @@ export class MdiShellComponent implements OnInit, AfterViewInit, OnDestroy {
   private setupUrlSync(): void {
     effect(() => {
       const active = this.mdi.activeWindow();
+      this.cmdContext.setActiveWindow(active ? active.id : null);
       if (!active) {
         if (this.mdi.windows().length === 0) {
           this.location.replaceState('');
         }
         return;
+      }
+
+      // Sincronizar módulo activo según la ventana enfocada
+      const winModCode = getModuleCodeForForm(active.formId || '', active.title);
+      if (winModCode && this.selectedModuleCode() !== winModCode) {
+        this.selectedModuleCode.set(winModCode);
+        this.cmdContext.setActiveModule(winModCode);
       }
 
       const slugs = getSlugForForm(active.formId || '', active.title);
@@ -147,6 +155,19 @@ export class MdiShellComponent implements OnInit, AfterViewInit, OnDestroy {
         meta: {
           name: 'Abrir Atención del Paciente',
           description: 'Abrir o enfocar la ventana de Atención del Paciente',
+          category: 'Módulo' as const
+        }
+      })
+    );
+
+    injectHotkey(
+      'Control+I',
+      () => this.openFormById('mnu_Adm_Proc_Cita', 'Gestión de Citas'),
+      () => ({
+        enabled: this.selectedModuleCode() === 'adm',
+        meta: {
+          name: 'Abrir Citas',
+          description: 'Abrir o enfocar la ventana de Citas del módulo Admisiones',
           category: 'Módulo' as const
         }
       })

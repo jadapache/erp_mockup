@@ -103,6 +103,12 @@ export function getSlugForForm(formId: string, title?: string): { moduleSlug: st
   return null;
 }
 
+export function getModuleCodeForForm(formId: string, title?: string): string | null {
+  buildSlugRegistry();
+  const match = slugRegistry.find(r => r.formId === formId || (title && r.title === title));
+  return match ? match.moduleCode : null;
+}
+
 export function resolveFormBySlugs(moduleSlugParam: string, formSlugParam: string): RouteMatchResult | null {
   buildSlugRegistry();
 

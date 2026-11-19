@@ -1,7 +1,8 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, computed, Injector, inject } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { CdkDrag, CdkDragHandle, CdkDragStart, CdkDragMove, CdkDragEnd } from '@angular/cdk/drag-drop';
 import { MdiWindow } from '../../models/mdi-window.model';
+import { MDI_WINDOW_ID } from '../../models/mdi-tokens';
 
 export interface DragPositionPayload {
   id: string;
@@ -23,9 +24,20 @@ export interface DragPositionPayload {
   }
 })
 export class MdiWindowComponent {
+  private readonly parentInjector = inject(Injector);
+
   window = input.required<MdiWindow>();
   workspaceWidth = input<number>(1200);
   workspaceHeight = input<number>(800);
+
+  readonly windowInjector = computed(() => {
+    return Injector.create({
+      providers: [
+        { provide: MDI_WINDOW_ID, useValue: this.window().id }
+      ],
+      parent: this.parentInjector
+    });
+  });
 
   activate = output<string>();
 

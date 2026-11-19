@@ -1,16 +1,49 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { MdiWindowService } from '../mdi/services/mdi-window.service';
-import { RefreshableForm } from './models/app-command.model';
+import { CommandContextService } from './command-context.service';
+import { RefreshableForm, UiCommand, CommandSurface } from './models/app-command.model';
 
 @Injectable({ providedIn: 'root' })
 export class CoreCommandsService {
   private readonly mdi = inject(MdiWindowService);
+  private readonly cmdContext = inject(CommandContextService);
 
   readonly isHelpModalOpen = signal(false);
   readonly isSearchModalOpen = signal(false);
   readonly lastRefreshNotification = signal<string | null>(null);
 
   private readonly refreshableForms = new Map<string, RefreshableForm>();
+  private readonly commands = signal<UiCommand[]>([]);
+
+  readonly allCommands = computed(() => this.commands());
+
+  registerCommand(cmd: UiCommand): () => void {
+    this.commands.update(list => {
+      const filtered = list.filter(c => c.id !== cmd.id);
+      return [...filtered, cmd];
+    });
+    return () => {
+      this.commands.update(list => list.filter(c => c.id !== cmd.id));
+    };
+  }
+
+  getCommandsForSurface(surface: CommandSurface): UiCommand[] {
+    const ctx = this.cmdContext.currentContext();
+    return this.commands().filter(cmd => {
+      if (!cmd.surfaces.includes(surface)) return false;
+      if (cmd.scope === 'module' && cmd.moduleId && cmd.moduleId !== ctx.activeModuleCode) return false;
+      if (cmd.scope === 'window' && cmd.windowId && cmd.windowId !== ctx.activeWindowId) return false;
+      if (cmd.scope === 'component' && cmd.componentId && cmd.componentId !== ctx.focusedComponentId) return false;
+      if (cmd.isVisible && !cmd.isVisible(ctx)) return false;
+      return true;
+    });
+  }
+
+  executeCommand(cmd: UiCommand): void {
+    const ctx = this.cmdContext.currentContext();
+    if (cmd.isEnabled && !cmd.isEnabled(ctx)) return;
+    cmd.execute(ctx);
+  }
 
   registerRefreshable(windowId: string, form: RefreshableForm): () => void {
     this.refreshableForms.set(windowId, form);

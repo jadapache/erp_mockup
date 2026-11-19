@@ -4,6 +4,7 @@ export interface MenuItem {
   orden?: string;
   url?: string;
   icon?: string;
+  shortcut?: string;
   children?: MenuItem[];
 }
 
