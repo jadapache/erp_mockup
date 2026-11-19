@@ -97,21 +97,29 @@ export class MdiShellComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private setupUrlSync(): void {
+    let lastActiveId: string | null = null;
+
     effect(() => {
       const active = this.mdi.activeWindow();
-      this.cmdContext.setActiveWindow(active ? active.id : null);
+      const currentActiveId = active ? active.id : null;
+      this.cmdContext.setActiveWindow(currentActiveId);
+
       if (!active) {
+        lastActiveId = null;
         if (this.mdi.windows().length === 0) {
           this.location.replaceState('');
         }
         return;
       }
 
-      // Sincronizar módulo activo según la ventana enfocada
-      const winModCode = getModuleCodeForForm(active.formId || '', active.title);
-      if (winModCode && this.selectedModuleCode() !== winModCode) {
-        this.selectedModuleCode.set(winModCode);
-        this.cmdContext.setActiveModule(winModCode);
+      // Sincronizar módulo activo únicamente cuando cambia la ventana enfocada
+      if (currentActiveId !== lastActiveId) {
+        lastActiveId = currentActiveId;
+        const winModCode = getModuleCodeForForm(active.formId || '', active.title);
+        if (winModCode && this.selectedModuleCode() !== winModCode) {
+          this.selectedModuleCode.set(winModCode);
+          this.cmdContext.setActiveModule(winModCode);
+        }
       }
 
       const slugs = getSlugForForm(active.formId || '', active.title);
